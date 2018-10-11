@@ -1,0 +1,21 @@
+Description: Deploy pipeline baybeee.
+
+Parameters:
+
+Mappings:
+
+Resources:
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        ArtifactStore
+      DisableInboundStageTransitions:
+        - DisableInboundStageTransitions  
+      Name: String
+      RestartExecutionOnUpdate: Boolean
+      RoleArn: String
+      Stages:
+      - Stages
+
+Outputs:
