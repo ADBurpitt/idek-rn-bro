@@ -10,10 +10,7 @@ phases:
       - ln -s "${CODEBUILD_SRC_DIR}" "/go/src/handler"
 
       # Install golint
-      # - go get -u github.com/golang/lint/golint # Broken???
-      - mkdir -p $GOPATH/src/golang.org/x \
-        && git clone https://github.com/golang/lint.git $GOPATH/src/golang.org/x/lint \
-        && go get -u golang.org/x/lint/golint
+      - go get -u golang.org/x/lint/golint
 
       # Install Testify to use common assertions and mocks in tests
       - go get -u github.com/stretchr/testify
