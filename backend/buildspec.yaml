@@ -40,6 +40,7 @@ phases:
       - chmod +x ./build.sh
       - ./build.sh
 
+      - ls
       # Package application with AWS CloudFormation/SAM
       - aws cloudformation package --template template.yaml --s3-bucket testerinocoderino --output-template packaged.yaml
 
