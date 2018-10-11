@@ -41,9 +41,9 @@ phases:
       - ./build.sh
 
       # Package application with AWS CloudFormation/SAM
-      - aws cloudformation package --template template.yml --s3-bucket testerinocoderino --output-template packaged.yml
+      - aws cloudformation package --template template.yaml --s3-bucket testerinocoderino --output-template packaged.yaml
 
 artifacts:
   type: zip
   files:
-    - template-export.yml
+    - packaged.yaml
