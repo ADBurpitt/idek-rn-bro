@@ -37,6 +37,7 @@ phases:
     commands:
 
       # Build our go application
+      - chmod +x ./build.sh
       - ./build.sh
 
       # Copy static assets to S3, and package application with AWS CloudFormation/SAM
