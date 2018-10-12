@@ -1,0 +1,54 @@
+version: 0.2
+
+phases:
+
+  install:
+    commands:
+
+      # Make sure we're in the frontend directory
+      - cd "${CODEBUILD_SRC_DIR}/frontend"
+
+      # Install dependancies
+      - npm install
+
+  pre_build:
+    commands:
+
+      # Run tests
+      - CI=true npm run test --forceExit
+
+  build:
+    commands:
+
+      # Disable sourcemap and builds
+      - GENERATE_SOURCEMAP=false npm run build
+
+  post_build:
+    commands:
+
+      # Copy the contents of /build to S3
+      - aws s3 cp --recursive --acl public-read ./build s3://${DeployBucket}/ 
+      # set the cache-control headers for service-worker.js to prevent
+      # browser caching
+      - >
+        aws s3 cp --acl public-read 
+        --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
+        ./build/service-worker.js s3://${DeployBucket}/
+      # set the cache-control headers for index.html to prevent
+      # browser caching
+      - >
+        aws s3 cp --acl public-read 
+        --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
+        ./build/index.html s3://${DeployBucket}/
+      # invalidate the CloudFront cache for index.html and service-worker.js
+      # to force CloudFront to update its edge locations with the new versions
+      - >
+        aws cloudfront create-invalidation --distribution-id ${Distribution} 
+        --paths /index.html /service-worker.js
+
+artifacts:
+  base-directory: frontend
+  type: zip
+  files:
+    - template.yaml
+  

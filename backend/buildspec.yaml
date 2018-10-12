@@ -7,7 +7,7 @@ phases:
 
       # AWS Codebuild Go images use /go for the $GOPATH so let's symlink our
       # application source code into that directory structure.
-      - ln -s "${CODEBUILD_SRC_DIR}" "/go/src/handler"
+      - ln -s "${CODEBUILD_SRC_DIR}/backend" "/go/src"
 
       # Install golint
       - go get -u golang.org/x/lint/golint
@@ -19,7 +19,7 @@ phases:
     commands:
 
       # Make sure we're in the project directory within our GOPATH
-      - cd "/go/src/handler/backend"
+      - cd "/go/src"
 
       # Fetch all dependencies
       - go get ./...
@@ -44,6 +44,7 @@ phases:
       - aws cloudformation package --template template.yaml --s3-bucket testerinocoderino --output-template packaged.yaml
 
 artifacts:
+  base-directory: backend
   type: zip
   files:
-    - backend/packaged.yaml
+    - packaged.yaml
