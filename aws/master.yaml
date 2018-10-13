@@ -1,0 +1,43 @@
+Description: Master stack which creates all required nested stacks
+
+Parameters:
+  Environment:
+    Type: String
+    Description: Select the appropriate environment
+    AllowedValues:
+      - dev
+      - beta
+      - prod
+
+Resources:
+  Hosting:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplatePath}/lambda.yml"
+      Parameters:
+        Environment:
+          Ref: Environment
+      Tags:
+        - Key: Name
+          Value: SecurityStack
+
+  SecurityStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplatePath}/security-stack.yml"
+      Parameters:
+        S3BucketName:
+          Ref: S3BucketName
+        VPCID:
+          Ref: VPCID
+        Environment:
+          Ref: Environment
+      Tags:
+        - Key: Name
+          Value: SecurityStack
+
+
+Outputs:
+  WebELBURL:
+    Description: "URL endpoint of web ELB"
+    Value: !GetAtt ServerStack.Outputs.WebELBURL

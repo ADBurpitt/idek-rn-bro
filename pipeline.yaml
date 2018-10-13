@@ -1,0 +1,445 @@
+Description: Create a CodePipeline to include Nested CloudFormation, CodeBuild and Approval steps.
+
+Parameters:
+  ProjectSource:
+    Type: String
+    Default: "https://github.com/adburpitt/idek-rn-bro"
+    Description: "Source URL"
+  GithubOwner:
+    Type: String
+    Default: ADBurpitt
+    Description: "Github repo owner"
+  GithubRepo:
+    Type: String
+    Default: idek-rn-bro
+    Description: "Github repo name"
+  GithubOAuthToken:
+    Type: String
+    Description: "Github access token"
+
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+  StackBucket:
+    Type: AWS::S3::Bucket
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  CodePipelineRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub CodePipelineRole-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codepipeline.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CodePipelineAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:DeleteObject"
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:ListBucket"
+                  - "s3:PutObject"
+                  - "s3:GetBucketPolicy"
+                Resource:
+                  - !GetAtt ArtifactStoreBucket.Arn
+                  - !Join ['', [ !GetAtt ArtifactStoreBucket.Arn, "/*"] ]
+              -
+                Effect: "Allow"
+                Action:
+                  - "cloudformation:CreateChangeSet"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:CreateUploadBucket"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:Describe*"
+                  - "cloudformation:List*"
+                  - "cloudformation:UpdateStack"
+                  - "cloudformation:ValidateTemplate"
+                  - "cloudformation:ExecuteChangeSet"
+                Resource:
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}*
+              -
+                Effect: "Allow"
+                Action:
+                  - "codebuild:StartBuild"
+                  - "codebuild:BatchGetBuilds"
+                Resource:
+                  - !GetAtt BackendBuild.Arn
+                  - !GetAtt BackendBuild.Arn
+                  - !GetAtt BackendBuild.Arn
+              -
+                Effect: "Allow"
+                Action:
+                  - "iam:PassRole"
+                Resource:
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole-${AWS::StackName}
+
+  CloudFormationRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub CloudFormationRole-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "cloudformation.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CloudFormationAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "iam:AddRoleToInstanceProfile"
+                  - "iam:AttachRolePolicy"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:CreatePolicy"
+                  - "iam:CreateRole"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:DeletePolicy"
+                  - "iam:DeleteRole"
+                  - "iam:DeleteRolePolicy"
+                  - "iam:DetachRolePolicy"
+                  - "iam:GetInstanceProfile"
+                  - "iam:GetPolicy"
+                  - "iam:GetRole"
+                  - "iam:GetRolePolicy"
+                  - "iam:ListAttachedRolePolicies"
+                  - "iam:ListInstanceProfiles"
+                  - "iam:ListInstanceProfilesForRole"
+                  - "iam:ListRolePolicies"
+                  - "iam:ListRoles"
+                  - "iam:PassRole"
+                  - "iam:PutRolePolicy"
+                  - "iam:RemoveRoleFromInstanceProfile"
+                Resource:
+                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/WebServerIAMRole-*
+              -
+                Effect: "Allow"
+                Action:
+                  - "iam:AddRoleToInstanceProfile"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:GetInstanceProfile"
+                  - "iam:ListInstanceProfiles"
+                  - "iam:ListInstanceProfilesForRole"
+                  - "iam:RemoveRoleFromInstanceProfile"
+                Resource:
+                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:instance-profile/Test-${AWS::StackName}-SecurityStack*
+                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:instance-profile/UAT-${AWS::StackName}-SecurityStack*
+                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:instance-profile/Prod-${AWS::StackName}-SecurityStack*
+              -
+                Effect: "Allow"
+                Action:
+                  - "rds:AddTagsToResource"
+                  - "rds:CreateDBInstance"
+                  - "rds:CreateDBSecurityGroup"
+                  - "rds:DeleteDBInstance"
+                  - "rds:DeleteDBSecurityGroup"
+                  - "rds:DescribeDBInstances"
+                  - "rds:DescribeDBParameterGroups"
+                  - "rds:DescribeDBParameters"
+                  - "rds:DescribeDBSecurityGroups"
+                  - "rds:DescribeDBSubnetGroups"
+                  - "rds:DescribeOptionGroups"
+                  - "rds:ModifyDBInstance"
+                  - "rds:RebootDBInstance"
+                  - "rds:RemoveTagsFromResource"
+                Resource:
+                  - Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:*
+                  - Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:og:*
+                  - Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:pg:*
+                  - Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:secgrp:*
+                  - Fn::Sub: arn:aws:rds:${AWS::Region}:${AWS::AccountId}:subgrp:*
+              -
+                Effect: "Allow"
+                Action:
+                  - "elasticloadbalancing:AddTags"
+                  - "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer"
+                  - "elasticloadbalancing:AttachLoadBalancerToSubnets"
+                  - "elasticloadbalancing:ConfigureHealthCheck"
+                  - "elasticloadbalancing:CreateListener"
+                  - "elasticloadbalancing:CreateLoadBalancerListeners"
+                  - "elasticloadbalancing:CreateLoadBalancerPolicy"
+                  - "elasticloadbalancing:DeleteListener"
+                  - "elasticloadbalancing:DeleteLoadBalancer"
+                  - "elasticloadbalancing:DeleteLoadBalancerListeners"
+                  - "elasticloadbalancing:DeleteLoadBalancerPolicy"
+                  - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
+                  - "elasticloadbalancing:DetachLoadBalancerFromSubnets"
+                  - "elasticloadbalancing:ModifyListener"
+                  - "elasticloadbalancing:ModifyLoadBalancerAttributes"
+                  - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                  - "elasticloadbalancing:RemoveTags"
+                  - "elasticloadbalancing:SetSecurityGroups"
+                  - "elasticloadbalancing:SetSubnets"
+                  - "elasticloadbalancing:SetLoadBalancerPoliciesOfListener"
+                  - "elasticloadbalancing:EnableAvailabilityZonesForLoadBalancer"
+                  - "elasticloadbalancing:DisableAvailabilityZonesForLoadBalancer"
+                Resource:
+                  - Fn::Sub: arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/WebELB-*
+              -
+                Effect: "Allow"
+                Action:
+                  - "autoscaling:AttachInstances"
+                  - "autoscaling:AttachLoadBalancers"
+                  - "autoscaling:CreateOrUpdateTags"
+                  - "autoscaling:DeleteAutoScalingGroup"
+                  - "autoscaling:DeleteLaunchConfiguration"
+                  - "autoscaling:DeleteTags"
+                  - "autoscaling:SetDesiredCapacity"
+                  - "autoscaling:SetInstanceHealth"
+                  - "autoscaling:TerminateInstanceInAutoScalingGroup"
+                  - "autoscaling:UpdateAutoScalingGroup"
+                Resource:
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/Test-${AWS::StackName}-ServerStack-*
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/UAT-${AWS::StackName}-ServerStack-*
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/Prod-${AWS::StackName}-ServerStack-*
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:launchConfiguration:${AWS::AccountId}:*:Test-${AWS::StackName}-ServerStack-*
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:launchConfiguration:${AWS::AccountId}:*:UAT-${AWS::StackName}-ServerStack-*
+                  - Fn::Sub: arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:launchConfiguration:${AWS::AccountId}:*:Prod-${AWS::StackName}-ServerStack-*
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                Resource:
+                  - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucket}
+                  - Fn::Sub: arn:aws:s3:::${ArtifactStoreBucket}/*
+  
+  CodeBuildRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName:
+        Fn::Sub: CodeBuildRole-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        -
+          PolicyName: "CodeBuildAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "cloudformation:Get*"
+                  - "cloudformation:Describe*"
+                  - "cloudformation:List*"
+                  - "cloudformation:ValidateTemplate"
+                Resource:
+                  - "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:PutObject"
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:ListBucket"
+                Resource:
+                  - !GetAtt ArtifactStoreBucket.Arn
+                  - !Join ['', [!GetAtt ArtifactStoreBucket.Arn, "/*"]]
+                  - !GetAtt StackBucket.Arn
+                  - !Join ['', [!GetAtt StackBucket.Arn, "/*"]]
+                  - !GetAtt FrontendBucket.Arn
+                  - !Join ['', [!GetAtt FrontendBucket.Arn, "/*"]] 
+
+  BackendBuild:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub ${AWS::StackName}-Backend-Build
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "backend/buildspec.yaml"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/golang:1.10"
+        EnvironmentVariables:
+          - Name: Bucket
+            Value: !Ref StackBucket
+      TimeoutInMinutes: 5
+
+  TemplateStoreBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-Template-Package??
+      Description: Build to validate and copy CFN templates
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:10.1.0"
+        EnvironmentVariables:
+          - Name: TEMPLATE_BUCKET
+            Value: !Ref StackBucket
+          - Name: TEMPLATE_PREFIX
+            Value: templates
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "buildspec.yaml"
+      TimeoutInMinutes: 5
+
+  # FrontendBuild:
+  #   Type: "AWS::CodeBuild::Project"
+  #   Properties:
+  #     Name: !Sub ${AWS::StackName}-Frontend-Build
+  #     ServiceRole: !GetAtt CodeBuildRole.Arn
+  #     Artifacts:
+  #       Type: CODEPIPELINE
+  #     Source:
+  #       Type: CODEPIPELINE
+  #       BuildSpec: "frontend/buildspec.yaml"
+  #     Environment:
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Type: LINUX_CONTAINER
+  #       Image: "aws/codebuild/nodejs:10.1.0"
+  #       EnvironmentVariables:
+  #         DeployBucket: !Sub ${DeployBucket}
+  #         Distribution: 
+  #     TimeoutInMinutes: 5
+
+  Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Sub ${AWS::StackName}-Pipeline
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactStoreBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: GitHub
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              OutputArtifacts:
+                - Name: App
+              Configuration:
+                Owner: !Ref GithubOwner
+                Repo: !Ref GithubRepo
+                Branch: master
+                OAuthToken: !Ref GithubOAuthToken
+              RunOrder: 1
+        
+        - Name: Build
+          Actions:
+            - Name: Package-Lambda
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: Templates
+              Configuration:
+                ProjectName: !Ref BackendBuild
+              RunOrder: 1
+
+            - Name: Store-Templates
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: Templates
+              OutputArtifacts:
+                - Name: Master-Stack
+              Configuration:
+                ProjectName: !Ref TemplateStoreBuild
+              RunOrder: 2
+
+        - Name: Backend
+          Actions:
+            - Name: Generate-Changeset
+              InputArtifacts:
+                - Name: Master-Stack
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                StackName: !Sub ${AWS::StackName}-Backend
+                ChangeSetName: !Sub ${AWS::StackName}-Backend-Changeset
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                Capabilities: CAPABILITY_IAM # IDK LOL
+                TemplatePath: Master-Stack::master.yaml
+              RunOrder: 1
+
+            - Name: Execute-Changeset
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                StackName: !Sub ${AWS::StackName}-Backend
+                ChangeSetName: !Sub ${AWS::StackName}-Backend-Changeset
+              RunOrder: 2
+
+        # - Name: Frontend
+        #   Actions:
+        #     - Name: Build
+        #       ActionTypeId:
+        #         Category: Build
+        #         Owner: AWS
+        #         Version: 1
+        #         Provider: CodeBuild
+        #       InputArtifacts:
+        #         - Name: App
+        #       OutputArtifacts:
+        #         - Name: Frontend
+        #       Configuration:
+        #         ProjectName: !Ref FrontendBuild
+        #       RunOrder: 1

@@ -1,0 +1,48 @@
+version: 0.2
+
+environment_variables:
+  plaintext:
+    CHILD_TEMPLATES: |
+      auth.yaml
+      hosting.yaml
+      database.yaml
+      storage.yaml
+      lambda.yaml
+    TEMPLATE_FILES: |
+      master.yaml
+      auth.yaml
+      hosting.yaml
+      database.yaml
+      storage.yaml
+      lambda.yaml
+
+phases:
+  install:
+    commands:
+      npm install jsonlint -g
+
+  pre_build:
+    commands:
+      - echo "Validating CFN templates"
+      - |
+        for cfn_template in $TEMPLATE_FILES; do
+          echo "Validating CloudFormation template file $cfn_template"
+          aws cloudformation validate-template --template-body file://$cfn_template
+        done
+
+  build:
+    commands:
+      - echo "Copying child stack templates to S3"
+      - |
+        for child_template in $CHILD_TEMPLATES; do
+          if [ "X$TEMPLATE_PREFIX" = "X" ]; then
+            aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/$child_template"
+          else
+            aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/$TEMPLATE_PREFIX/$child_template"
+          fi
+        done
+
+artifacts:
+  type: zip
+  files:
+    - master.yaml

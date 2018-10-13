@@ -41,10 +41,9 @@ phases:
       - ./build.sh
 
       # Package application with AWS CloudFormation/SAM
-      - aws cloudformation package --template template.yaml --s3-bucket testerinocoderino --output-template packaged.yaml
+      - aws cloudformation package --template template.yaml --s3-bucket "${BUCKET}" --output-template ../aws/lambda.yaml
 
 artifacts:
-  base-directory: backend
   type: zip
   files:
-    - packaged.yaml
+    - aws/*

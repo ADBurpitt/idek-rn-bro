@@ -15,7 +15,7 @@ phases:
     commands:
 
       # Run tests
-      - CI=true npm run test --forceExit
+      - CI=true npm run test
 
   build:
     commands:
