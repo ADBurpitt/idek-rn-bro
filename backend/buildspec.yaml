@@ -4,7 +4,7 @@ phases:
 
   install:
     commands:
-
+      - ls
       # AWS Codebuild Go images use /go for the $GOPATH so let's symlink our
       # application source code into that directory structure.
       - ln -s "${CODEBUILD_SRC_DIR}/backend" "/go/src"
@@ -20,7 +20,7 @@ phases:
 
       # Make sure we're in the project directory within our GOPATH
       - cd "/go/src"
-
+      - ls
       # Fetch all dependencies
       - go get ./...
 
