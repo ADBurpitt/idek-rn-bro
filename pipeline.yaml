@@ -296,7 +296,7 @@ Resources:
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/golang:1.10"
         EnvironmentVariables:
-          - Name: Bucket
+          - Name: BUCKET
             Value: !Ref StackBucket
       TimeoutInMinutes: 5
 
