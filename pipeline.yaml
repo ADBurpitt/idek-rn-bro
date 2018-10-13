@@ -303,7 +303,7 @@ Resources:
   TemplateStoreBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-Template-Package??
+      Name: !Sub ${AWS::StackName}-Template-Package
       Description: Build to validate and copy CFN templates
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
