@@ -3,20 +3,20 @@ Description: Master stack which creates all required nested stacks
 Parameters:
   TemplatePath:
     Type: String
-  Environment:
-    Type: String
-    Description: Select the appropriate environment
-    AllowedValues:
-      - dev
-      - beta
-      - prod
+  # Environment:
+  #   Type: String
+  #   Description: Select the appropriate environment
+  #   AllowedValues:
+  #     - dev
+  #     - beta
+  #     - prod
 
 Resources:
   Hosting:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplatePath}/lambda.yml"
-      Parameters:
+      # Parameters:
         # Environment: !Ref Environment
       Tags:
         - Key: Name

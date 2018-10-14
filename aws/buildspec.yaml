@@ -3,18 +3,19 @@ version: 0.2
 environment_variables:
   plaintext:
     CHILD_TEMPLATES: |
-      # auth.yaml
-      # hosting.yaml
-      # database.yaml
-      # storage.yaml
       lambda.yaml
     TEMPLATE_FILES: |
       master.yaml
-      # auth.yaml
-      # hosting.yaml
-      # database.yaml
-      # storage.yaml
       lambda.yaml
+
+# auth.yaml
+# hosting.yaml
+# database.yaml
+# storage.yaml
+# auth.yaml
+# hosting.yaml
+# database.yaml
+# storage.yaml
 
 phases:
   install:

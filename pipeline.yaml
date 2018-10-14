@@ -415,6 +415,10 @@ Resources:
                 RoleArn: !GetAtt CloudFormationRole.Arn
                 Capabilities: CAPABILITY_IAM # IDK LOL
                 TemplatePath: Master-Stack::master.yaml
+                ParameterOverrides: |
+                  {
+                    "TemplatePath": "lol-rip"
+                  }
               RunOrder: 1
 
             - Name: Execute-Changeset
