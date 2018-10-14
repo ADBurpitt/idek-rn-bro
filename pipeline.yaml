@@ -80,8 +80,8 @@ Resources:
                   - "codebuild:BatchGetBuilds"
                 Resource:
                   - !GetAtt BackendBuild.Arn
-                  - !GetAtt BackendBuild.Arn
-                  - !GetAtt BackendBuild.Arn
+                  - !GetAtt TemplateStoreBuild.Arn
+                  # - !GetAtt FrontendBuild.Arn
               -
                 Effect: "Allow"
                 Action:
@@ -304,10 +304,13 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Sub ${AWS::StackName}-Template-Package
-      Description: Build to validate and copy CFN templates
+      Description: Validate and copy CFN templates
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "aws/buildspec.yaml"
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
@@ -317,9 +320,7 @@ Resources:
             Value: !Ref StackBucket
           - Name: TEMPLATE_PREFIX
             Value: templates
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: "buildspec.yaml"
+      
       TimeoutInMinutes: 5
 
   # FrontendBuild:
