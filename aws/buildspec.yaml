@@ -3,10 +3,10 @@ version: 0.2
 environment_variables:
   plaintext:
     CHILD_TEMPLATES: |
-      lambda.yaml
+      hosting.yaml
     TEMPLATE_FILES: |
       master.yaml
-      lambda.yaml
+      hosting.yaml
 
 # auth.yaml
 # hosting.yaml
@@ -47,4 +47,4 @@ phases:
 artifacts:
   type: zip
   files:
-    - master.yaml
+    - aws/master.yaml

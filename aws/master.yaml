@@ -12,7 +12,7 @@ Parameters:
   #     - prod
 
 Resources:
-  Hosting:
+  Lambda:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${TemplatePath}/lambda.yml"
@@ -20,7 +20,18 @@ Resources:
         # Environment: !Ref Environment
       Tags:
         - Key: Name
-          Value: ApiStack
+          Value: API
+  
+  CDN:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${TemplatePath}/hosting.yml"
+      Parameters:
+        DeployBucketDomain: !Ref DeployBucketDomain
+        DeployBucketId: !Ref DeployBucketId
+      Tags:
+        - Key: Name
+          Value: CDN
 
   # SecurityStack:
   #   Type: "AWS::CloudFormation::Stack"

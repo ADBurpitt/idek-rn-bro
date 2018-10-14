@@ -16,6 +16,10 @@ Parameters:
   GithubOAuthToken:
     Type: String
     Description: "Github access token"
+  
+  TemplatePrefix:
+    Type: String
+    Value: "templates"
 
 Resources:
   ArtifactStoreBucket:
@@ -319,7 +323,7 @@ Resources:
           - Name: TEMPLATE_BUCKET
             Value: !Ref StackBucket
           - Name: TEMPLATE_PREFIX
-            Value: templates
+            Value: !Ref TemplatePrefix
       
       TimeoutInMinutes: 5
 
@@ -417,7 +421,11 @@ Resources:
                 TemplatePath: Master-Stack::master.yaml
                 ParameterOverrides: |
                   {
-                    "TemplatePath": "lol-rip"
+                    "TemplatePath": {
+                      "Fn::Join" : [ "/", [ { "Ref": "StackBucket", "Ref": "TemplatePrefix" } ] ]
+                    },
+                    "DeployBucketId": { "Fn::Ref" : "FrontendBucket" }
+                    "DeployBucketDomain": { "Fn::GetAtt" : [ "FrontendBucket", "DomainName" ] }
                   }
               RunOrder: 1
 

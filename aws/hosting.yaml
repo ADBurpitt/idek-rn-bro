@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Defines CDN/S3/Route53 for the frontend
 
+Parameters:
+  DeployBucketDomain:
+    Type: String
+  DeployBucketId:
+    Type: String
+
 Resources:
   Distribution:
       Type: "AWS::CloudFront::Distribution"
@@ -8,8 +14,8 @@ Resources:
         DistributionConfig:
           Origins:
             - 
-              DomainName: !GetAtt DeployBucket.DomainName
-              Id: !Ref DeployBucket
+              DomainName: !Ref DeployBucketDomain
+              Id: !Ref DeployBucketId
               S3OriginConfig:
                 OriginAccessIdentity: ''
           DefaultRootObject: index.html
@@ -19,7 +25,7 @@ Resources:
             MaxTTL: 31536000
             ForwardedValues: 
               QueryString: true
-            TargetOriginId: !Ref DeployBucket
+            TargetOriginId: !Ref DeployBucketId
             ViewerProtocolPolicy: "redirect-to-https"
 
-Output:
+# Output:
