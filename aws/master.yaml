@@ -3,6 +3,10 @@ Description: Master stack which creates all required nested stacks
 Parameters:
   TemplatePath:
     Type: String
+  DeployBucketId:
+    Type: String
+  DeployBucketDomain:
+    Type: String
   # Environment:
   #   Type: String
   #   Description: Select the appropriate environment
