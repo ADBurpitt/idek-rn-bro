@@ -53,7 +53,7 @@ Resources:
   #         Value: SecurityStack
 
 
-Outputs:
+# Outputs:
   # WebELBURL:
   #   Description: "URL endpoint of web ELB"
   #   Value: !GetAtt ServerStack.Outputs.WebELBURL
