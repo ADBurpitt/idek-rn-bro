@@ -19,7 +19,7 @@ Parameters:
   
   TemplatePrefix:
     Type: String
-    Value: "templates"
+    Default: "templates"
 
 Resources:
   ArtifactStoreBucket:
@@ -324,7 +324,10 @@ Resources:
             Value: !Ref StackBucket
           - Name: TEMPLATE_PREFIX
             Value: !Ref TemplatePrefix
-      
+          - Name: DEPLOY_BUCKET_ID
+            Value: !Ref FrontendBucket
+          - Name: DEPLOY_BUCKET_DOMAIN
+            Value: !GetAtt FrontendBucket.DomainName
       TimeoutInMinutes: 5
 
   # FrontendBuild:
@@ -419,14 +422,7 @@ Resources:
                 RoleArn: !GetAtt CloudFormationRole.Arn
                 Capabilities: CAPABILITY_IAM # IDK LOL
                 TemplatePath: Master-Stack::master.yaml
-                ParameterOverrides: |
-                  {
-                    "TemplatePath": {
-                      "Fn::Join" : [ "/", [ { "Ref": "StackBucket", "Ref": "TemplatePrefix" } ] ]
-                    },
-                    "DeployBucketId": { "Fn::Ref" : "FrontendBucket" }
-                    "DeployBucketDomain": { "Fn::GetAtt" : [ "FrontendBucket", "DomainName" ] }
-                  }
+                TemplateConfiguration: Master-Stack::config.json
               RunOrder: 1
 
             - Name: Execute-Changeset

@@ -43,8 +43,24 @@ phases:
             aws s3 cp "$child_template" "s3://$TEMPLATE_BUCKET/$TEMPLATE_PREFIX/$child_template"
           fi
         done
+      - |
+        if [ "X$TEMPLATE_PREFIX" = "X" ]; then
+          echo "Replacing \"TEMPLATE_PATH_PLACEHOLDER\" for \"$TEMPLATE_BUCKET\" in config.json"
+          sed -i -e "s/TEMPLATE_PATH_PLACEHOLDER/$TEMPLATE_BUCKET/" config.json
+        else
+          echo "Replacing \"TEMPLATE_PATH_PLACEHOLDER\" for \"$TEMPLATE_BUCKET/$TEMPLATE_PREFIX\" in config.json"
+          sed -i -e "s/TEMPLATE_PATH_PLACEHOLDER/$TEMPLATE_BUCKET\/$TEMPLATE_PREFIX/" config.json
+        fi
+      - |
+        echo "Replacing \"ID_PLACEHOLDER\" for \"$DEPLOY_BUCKET_ID\" in config.json"
+        sed -i -e "s/ID_PLACEHOLDER/$DEPLOY_BUCKET_ID/" config.json
+      - |
+        echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DEPLOY_BUCKET_DOMAIN\" in config.json"
+        sed -i -e "s/DOMAIN_PLACEHOLDER/$DEPLOY_BUCKET_DOMAIN/" config.json
 
 artifacts:
+  base-directory: aws
   type: zip
   files:
-    - aws/master.yaml
+    - master.yaml
+    - config.json

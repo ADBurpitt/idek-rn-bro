@@ -1,0 +1,8 @@
+{
+  "Parameters" : {
+    "TemplatePath": "TEMPLATE_PATH_PLACEHOLDER",
+
+    "DeployBucketId": "ID_PLACEHOLDER",
+    "DeployBucketDomain": "DOMAIN_PLACEHOLDER"
+  }
+}
