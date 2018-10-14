@@ -19,7 +19,7 @@ environment_variables:
 phases:
   install:
     commands:
-      - ls
+      - cd aws
       - npm install jsonlint -g
 
   pre_build:
