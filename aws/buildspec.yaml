@@ -4,9 +4,11 @@ environment_variables:
   plaintext:
     CHILD_TEMPLATES: |
       hosting.yaml
+      lambda.json
     TEMPLATE_FILES: |
       master.yaml
       hosting.yaml
+      lambda.json
 
 # auth.yaml
 # hosting.yaml

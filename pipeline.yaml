@@ -180,7 +180,13 @@ Resources:
                   - !GetAtt StackBucket.Arn
                   - !Join ['', [!GetAtt StackBucket.Arn, "/*"]]
                   - !GetAtt FrontendBucket.Arn
-                  - !Join ['', [!GetAtt FrontendBucket.Arn, "/*"]] 
+                  - !Join ['', [!GetAtt FrontendBucket.Arn, "/*"]]
+              -
+                Effect: "Allow"
+                Action:
+                  - "iam:ListPolicies"
+                Resource:
+                  - "*"
 
   BackendBuild:
     Type: "AWS::CodeBuild::Project"
