@@ -19,7 +19,7 @@ Resources:
   Lambda:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatePath}/lambda.yaml"
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatePath}/lambda.json"
       # Parameters:
         # Environment: !Ref Environment
       Tags:

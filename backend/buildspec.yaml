@@ -40,9 +40,10 @@ phases:
       - chmod +x ./build.sh
       - ./build.sh
 
-      - printenv
+      - 
       # Package application with AWS CloudFormation/SAM
-      - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template ../aws/lambda.yaml
+      - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template package.yaml
+      - python sam-translate.py --input-file="package.yaml" --output-file="../aws/lambda.json"
 
 artifacts:
   type: zip
