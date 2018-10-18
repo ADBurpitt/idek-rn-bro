@@ -121,6 +121,15 @@ Resources:
                 Action: "iam:*"
                 Resource: "*"
 
+              - Effect: "Allow"
+                Action: "lambda:*"
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}*
+
+              - Effect: "Allow"
+                Action: "apigateway:*"
+                Resource: "*"
+
+
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:

@@ -26,16 +26,16 @@ Resources:
         - Key: Name
           Value: API
   
-  # CDN:
-  #   Type: "AWS::CloudFormation::Stack"
-  #   Properties:
-  #     TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatePath}/hosting.yaml"
-  #     Parameters:
-  #       DeployBucketDomain: !Ref DeployBucketDomain
-  #       DeployBucketId: !Ref DeployBucketId
-  #     Tags:
-  #       - Key: Name
-  #         Value: CDN
+  CDN:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatePath}/hosting.yaml"
+      Parameters:
+        DeployBucketDomain: !Ref DeployBucketDomain
+        DeployBucketId: !Ref DeployBucketId
+      Tags:
+        - Key: Name
+          Value: CDN
 
   # SecurityStack:
   #   Type: "AWS::CloudFormation::Stack"
