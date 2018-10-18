@@ -68,15 +68,7 @@ Resources:
               -
                 Effect: "Allow"
                 Action:
-                  - "cloudformation:CreateChangeSet"
-                  - "cloudformation:CreateStack"
-                  - "cloudformation:CreateUploadBucket"
-                  - "cloudformation:DeleteStack"
-                  - "cloudformation:Describe*"
-                  - "cloudformation:List*"
-                  - "cloudformation:UpdateStack"
-                  - "cloudformation:ValidateTemplate"
-                  - "cloudformation:ExecuteChangeSet"
+                  - "cloudformation:*"
                 Resource:
                   - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}*
               -
@@ -102,8 +94,7 @@ Resources:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          -
-            Effect: "Allow"
+          - Effect: "Allow"
             Principal:
               Service:
                 - "cloudformation.amazonaws.com"
@@ -114,21 +105,22 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              -
-                Effect: "Allow"
-                Action:
-                  - "s3:DeleteObject"
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:ListBucket"
-                  - "s3:PutObject"
-                  - "s3:GetBucketPolicy"
-                Resource:
-                  - !GetAtt ArtifactStoreBucket.Arn
-                  - !Join ['', [ !GetAtt ArtifactStoreBucket.Arn, "/*"] ]
-                  - !GetAtt StackBucket.Arn
-                  - !Join ['', [ !GetAtt StackBucket.Arn, "/*"] ]
-  
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "cloudfront:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "iam:*"
+                Resource: "*"
+
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:
