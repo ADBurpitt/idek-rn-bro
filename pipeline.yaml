@@ -43,16 +43,16 @@ Resources:
     Properties:
       BucketName: !If
         - isProd
-        - !Sub ${ProjectName}-Stack-Bucket
-        - !Sub ${ProjectName}-${Environment}-Stack-Bucket
+        - !Sub ${ProjectName}-stack-bucket
+        - !Sub ${ProjectName}-${Environment}-stack-bucket
       
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !If
         - isProd
-        - !Sub ${ProjectName}-Frontend-Bucket
-        - !Sub ${ProjectName}-${Environment}-Frontend-Bucket
+        - !Sub ${ProjectName}-frontend-bucket
+        - !Sub ${ProjectName}-${Environment}-frontend-bucket
       WebsiteConfiguration:
         IndexDocument: index.html
   
