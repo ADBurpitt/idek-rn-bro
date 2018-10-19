@@ -15,8 +15,6 @@ Resources:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplatePath}/API.json"
-      Parameters:
-        Environment: !Ref Environment
   
   DNS:
     Type: "AWS::CloudFormation::Stack"
