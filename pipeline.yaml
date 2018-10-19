@@ -297,7 +297,7 @@ Resources:
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/nodejs:10.1.0"
         EnvironmentVariables:
-          DeployBucket: !Ref DeployBucket
+          DeployBucket: !Ref FrontendBucket
           Distribution: !Ref Distribution
       TimeoutInMinutes: 5
 
