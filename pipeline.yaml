@@ -56,28 +56,28 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
   
-    Distribution:
-      Type: "AWS::CloudFront::Distribution"
-      Properties:
-        DistributionConfig:
-          Comment: !If
-            - isProd
-            - !Sub ${ProjectName}-Distribution
-            - !Sub ${ProjectName}-${Environment}-Distribution
-          Origins:
-            - DomainName: !GetAtt FrontendBucket.DomainName
-              Id: !Ref FrontendBucket
-              S3OriginConfig:
-                OriginAccessIdentity: ''
-          DefaultRootObject: index.html
-          Enabled: true
-          DefaultCacheBehavior: 
-            MinTTL: 86400
-            MaxTTL: 31536000
-            ForwardedValues: 
-              QueryString: true
-            TargetOriginId: !Ref FrontendBucket
-            ViewerProtocolPolicy: "redirect-to-https"
+  Distribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Comment: !If
+          - isProd
+          - !Sub ${ProjectName}-Distribution
+          - !Sub ${ProjectName}-${Environment}-Distribution
+        Origins:
+          - DomainName: !GetAtt FrontendBucket.DomainName
+            Id: !Ref FrontendBucket
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultRootObject: index.html
+        Enabled: true
+        DefaultCacheBehavior: 
+          MinTTL: 86400
+          MaxTTL: 31536000
+          ForwardedValues: 
+            QueryString: true
+          TargetOriginId: !Ref FrontendBucket
+          ViewerProtocolPolicy: "redirect-to-https"
 
   CodePipelineRole:
     Type: "AWS::IAM::Role"
