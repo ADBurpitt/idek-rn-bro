@@ -61,7 +61,7 @@ phases:
         sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN_NAME/" config.json
       - |
         echo "Replacing \"CERT_PLACEHOLDER\" for \"$CERTIFICATE_ARN\" in config.json"
-        sed -i -e "s/CERT_PLACEHOLDER/$CERTIFICATE_ARN/" config.json
+        sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE_ARN#" config.json
 
 artifacts:
   base-directory: aws

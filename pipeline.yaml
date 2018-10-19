@@ -106,8 +106,8 @@ Resources:
                 Action: "s3:*"
                 Resource: !If
                   - isProd
-                  - !Sub arn:aws:s3:::${ProjectName}*
-                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}-${Environment}*
          
               - Effect: "Allow"
                 Action: "cloudformation:*"
@@ -153,8 +153,8 @@ Resources:
                 Action: "s3:*"
                 Resource: !If
                   - isProd
-                  - !Sub arn:aws:s3:::${ProjectName}*
-                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}-${Environment}*
               
               - Effect: "Allow"
                 Action: "cloudformation:*"
@@ -184,7 +184,6 @@ Resources:
                   - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}*
                   - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}-${Environment}*
                 
-
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -212,6 +211,10 @@ Resources:
                   - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-${Environment}*
               
               - Effect: "Allow"
+                Action: "cloudformation:ValidateTemplate"
+                Resource: "*"
+
+              - Effect: "Allow"
                 Action: "logs:*"
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
               
@@ -219,8 +222,8 @@ Resources:
                 Action: "s3:*"
                 Resource: !If
                   - isProd
-                  - !Sub arn:aws:s3:::${ProjectName}*
-                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}*
+                  - !Sub arn:aws:s3:::${ProjectNameLowercase}-${Environment}*
               
               - Effect: "Allow"
                 Action: "iam:ListPolicies"

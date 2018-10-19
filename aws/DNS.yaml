@@ -48,5 +48,5 @@ Resources:
         - !Sub ${Environment}.api.${DomainName}
       Type: A
       AliasTarget:
-        DNSName: !GettAtt ApiDomainName.DistributionDomainName
-        HostedZoneId: !GettAtt ApiDomainName.DistributionHostedZoneId
+        DNSName: !GetAtt ApiDomainName.DistributionDomainName
+        HostedZoneId: !GetAtt ApiDomainName.DistributionHostedZoneId
