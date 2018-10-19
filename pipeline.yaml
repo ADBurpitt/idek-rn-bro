@@ -415,7 +415,7 @@ Resources:
 
         - Name: Frontend
           Actions:
-            - Name: Build-&-Deploy
+            - Name: Build-and-Deploy
               ActionTypeId:
                 Category: Build
                 Owner: AWS
