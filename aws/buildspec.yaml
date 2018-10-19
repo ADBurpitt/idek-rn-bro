@@ -3,12 +3,12 @@ version: 0.2
 environment_variables:
   plaintext:
     CHILD_TEMPLATES: |
-      hosting.yaml
-      lambda.json
+      DNS.yaml
+      API.json
     TEMPLATE_FILES: |
       master.yaml
-      hosting.yaml
-      lambda.json
+      DNS.yaml
+      API.json
 
 # auth.yaml
 # hosting.yaml
@@ -54,11 +54,14 @@ phases:
           sed -i -e "s/TEMPLATE_PATH_PLACEHOLDER/$TEMPLATE_BUCKET\/$TEMPLATE_PREFIX/" config.json
         fi
       - |
-        echo "Replacing \"ID_PLACEHOLDER\" for \"$DEPLOY_BUCKET_ID\" in config.json"
-        sed -i -e "s/ID_PLACEHOLDER/$DEPLOY_BUCKET_ID/" config.json
+        echo "Replacing \"ENV_PLACEHOLDER\" for \"$ENVIRONMENT\" in config.json"
+        sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
       - |
-        echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DEPLOY_BUCKET_DOMAIN\" in config.json"
-        sed -i -e "s/DOMAIN_PLACEHOLDER/$DEPLOY_BUCKET_DOMAIN/" config.json
+        echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DOMAIN_NAME\" in config.json"
+        sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN_NAME/" config.json
+      - |
+        echo "Replacing \"CERT_PLACEHOLDER\" for \"$CERTIFICATE_ARN\" in config.json"
+        sed -i -e "s/CERT_PLACEHOLDER/$CERTIFICATE_ARN/" config.json
 
 artifacts:
   base-directory: aws

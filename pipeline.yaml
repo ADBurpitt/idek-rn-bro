@@ -1,10 +1,21 @@
-Description: Create a CodePipeline to include Nested CloudFormation, CodeBuild and Approval steps.
+Description: CodePipeline
 
 Parameters:
   ProjectSource:
     Type: String
     Default: "https://github.com/adburpitt/idek-rn-bro"
     Description: "Source URL"
+  ProjectName:
+    Type: String
+    Description: "Project Name"
+  DomainName:
+    Type: String
+  CertificateArn:
+    Type: String
+  Environment:
+    Type: String
+    Default: ''
+
   GithubOwner:
     Type: String
     Default: ADBurpitt
@@ -21,85 +32,114 @@ Parameters:
     Type: String
     Default: "templates"
 
+Conditions:
+  isProd: !Equals
+    - !Ref Environment
+    - ''
+
 Resources:
-  ArtifactStoreBucket:
-    Type: AWS::S3::Bucket
   StackBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !If
+        - isProd
+        - !Sub ${ProjectName}-Stack-Bucket
+        - !Sub ${ProjectName}-${Environment}-Stack-Bucket
+      
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketName: !If
+        - isProd
+        - !Sub ${ProjectName}-Frontend-Bucket
+        - !Sub ${ProjectName}-${Environment}-Frontend-Bucket
       WebsiteConfiguration:
         IndexDocument: index.html
+  
+    Distribution:
+      Type: "AWS::CloudFront::Distribution"
+      Properties:
+        DistributionConfig:
+          Comment: !If
+            - isProd
+            - !Sub ${ProjectName}-Distribution
+            - !Sub ${ProjectName}-${Environment}-Distribution
+          Origins:
+            - DomainName: !GetAtt FrontendBucket.DomainName
+              Id: !Ref FrontendBucket
+              S3OriginConfig:
+                OriginAccessIdentity: ''
+          DefaultRootObject: index.html
+          Enabled: true
+          DefaultCacheBehavior: 
+            MinTTL: 86400
+            MaxTTL: 31536000
+            ForwardedValues: 
+              QueryString: true
+            TargetOriginId: !Ref FrontendBucket
+            ViewerProtocolPolicy: "redirect-to-https"
 
   CodePipelineRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub CodePipelineRole-${AWS::StackName}
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Principal:
-              Service:
-                - "codepipeline.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: "CodePipelineAccessPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              -
-                Effect: "Allow"
-                Action:
-                  - "s3:DeleteObject"
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:ListBucket"
-                  - "s3:PutObject"
-                  - "s3:GetBucketPolicy"
-                Resource:
-                  - !GetAtt ArtifactStoreBucket.Arn
-                  - !Join ['', [ !GetAtt ArtifactStoreBucket.Arn, "/*"] ]
-                  - !GetAtt StackBucket.Arn
-                  - !Join ['', [ !GetAtt StackBucket.Arn, "/*"] ]
-              -
-                Effect: "Allow"
-                Action:
-                  - "cloudformation:*"
-                Resource:
-                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}*
-              -
-                Effect: "Allow"
-                Action:
-                  - "codebuild:StartBuild"
-                  - "codebuild:BatchGetBuilds"
-                Resource:
-                  - !GetAtt BackendBuild.Arn
-                  - !GetAtt TemplateStoreBuild.Arn
-                  # - !GetAtt FrontendBuild.Arn
-              -
-                Effect: "Allow"
-                Action:
-                  - "iam:PassRole"
-                Resource:
-                  - !Sub arn:aws:iam::${AWS::AccountId}:role/CloudFormationRole-${AWS::StackName}
-
-  CloudFormationRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: !Sub CloudFormationRole-${AWS::StackName}
+      RoleName: !If
+        - isProd
+        - !Sub ${ProjectName}-CodePipelineRole
+        - !Sub ${ProjectName}-${Environment}-CodePipelineRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: "Allow"
             Principal:
-              Service:
-                - "cloudformation.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
+              Service: "codepipeline.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CodePipelineAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:s3:::${ProjectName}*
+                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
+         
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}*
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-${Environment}*
+              
+              - Effect: "Allow"
+                Action: "codebuild:*"
+                Resource:
+                  - !GetAtt BackendBuild.Arn
+                  - !GetAtt TemplateStoreBuild.Arn
+                  - !GetAtt FrontendBuild.Arn
+              
+              - Effect: "Allow"
+                Action: "iam:PassRole"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-CloudFormationRole
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-${Environment}-CloudFormationRole
+
+  CloudFormationRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !If
+        - isProd
+        - !Sub ${ProjectName}-CloudFormationRole
+        - !Sub ${ProjectName}-${Environment}-CloudFormationRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "cloudformation.amazonaws.com"
+            Action: "sts:AssumeRole"
       Policies:
         - PolicyName: "CloudFormationAccessPolicy"
           PolicyDocument:
@@ -107,92 +147,92 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "s3:*"
-                Resource: "*"
-              
-              - Effect: "Allow"
-                Action: "cloudfront:*"
-                Resource: "*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:s3:::${ProjectName}*
+                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
               
               - Effect: "Allow"
                 Action: "cloudformation:*"
-                Resource: "*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}*
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-${Environment}*
               
               - Effect: "Allow"
                 Action: "iam:*"
-                Resource: "*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/${ProjectName}*
+                  - !Sub arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-${Environment}*
 
               - Effect: "Allow"
                 Action: "lambda:*"
-                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}*
-
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}*
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-${Environment}*
+                
               - Effect: "Allow"
                 Action: "apigateway:*"
-                Resource: "*"
-
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}*
+                  - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}-${Environment}*
+                
 
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName:
-        Fn::Sub: CodeBuildRole-${AWS::StackName}
+      RoleName: !If
+        - isProd
+        - !Sub ${ProjectName}-CodeBuildRole
+        - !Sub ${ProjectName}-${Environment}-CodeBuildRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          -
-            Effect: "Allow"
+          - Effect: "Allow"
             Principal:
-              Service:
-                - "codebuild.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
+              Service: "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
       Policies:
-        -
-          PolicyName: "CodeBuildAccessPolicy"
+        - PolicyName: "CodeBuildAccessPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              -
-                Effect: "Allow"
-                Action:
-                  - "cloudformation:Get*"
-                  - "cloudformation:Describe*"
-                  - "cloudformation:List*"
-                  - "cloudformation:ValidateTemplate"
-                Resource:
-                  - "*"
-              -
-                Effect: "Allow"
-                Action:
-                  - "logs:CreateLogGroup"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource:
-                  - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
-              -
-                Effect: "Allow"
-                Action:
-                  - "s3:PutObject"
-                  - "s3:GetObject"
-                  - "s3:GetObjectVersion"
-                  - "s3:ListBucket"
-                Resource:
-                  - !GetAtt ArtifactStoreBucket.Arn
-                  - !Join ['', [!GetAtt ArtifactStoreBucket.Arn, "/*"]]
-                  - !GetAtt StackBucket.Arn
-                  - !Join ['', [!GetAtt StackBucket.Arn, "/*"]]
-                  - !GetAtt FrontendBucket.Arn
-                  - !Join ['', [!GetAtt FrontendBucket.Arn, "/*"]]
-              -
-                Effect: "Allow"
-                Action:
-                  - "iam:ListPolicies"
-                Resource:
-                  - "*"
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}*
+                  - !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-${Environment}*
+              
+              - Effect: "Allow"
+                Action: "logs:*"
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: !If
+                  - isProd
+                  - !Sub arn:aws:s3:::${ProjectName}*
+                  - !Sub arn:aws:s3:::${ProjectName}-${Environment}*
+              
+              - Effect: "Allow"
+                Action: "iam:ListPolicies"
+                Resource: "*"
+              
+              - Effect: Allow
+                Action: "cloudfront:CreateInvalidation"
+                Resource: !GetAtt Distribution.Arn
 
-  BackendBuild:
+  ApiBuild:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Name: !Sub ${AWS::StackName}-Backend-Build
+      Name: !If
+        - isProd
+        - !Sub ${ProjectName}-ApiBuild
+        - !Sub ${ProjectName}-${Environment}-ApiBuild
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
         Type: CODEPIPELINE
@@ -211,7 +251,10 @@ Resources:
   TemplateStoreBuild:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub ${AWS::StackName}-Template-Package
+      Name: !If
+        - isProd
+        - !Sub ${ProjectName}-TemplateStoreBuild
+        - !Sub ${ProjectName}-${Environment}-TemplateStoreBuild
       Description: Validate and copy CFN templates
       ServiceRole: !GetAtt CodeBuildRole.Arn
       Artifacts:
@@ -224,43 +267,51 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: "aws/codebuild/nodejs:10.1.0"
         EnvironmentVariables:
+          - Name: ENVIRONMENT
+            Value: !Ref Environment
           - Name: TEMPLATE_BUCKET
             Value: !Ref StackBucket
           - Name: TEMPLATE_PREFIX
             Value: !Ref TemplatePrefix
-          - Name: DEPLOY_BUCKET_ID
-            Value: !Ref FrontendBucket
-          - Name: DEPLOY_BUCKET_DOMAIN
-            Value: !GetAtt FrontendBucket.DomainName
+          - Name: DOMAIN_NAME
+            Value: !Ref DomainName
+          - Name: CERTIFICATE_ARN
+            Value: !Ref CertificateArn
       TimeoutInMinutes: 5
 
-  # FrontendBuild:
-  #   Type: "AWS::CodeBuild::Project"
-  #   Properties:
-  #     Name: !Sub ${AWS::StackName}-Frontend-Build
-  #     ServiceRole: !GetAtt CodeBuildRole.Arn
-  #     Artifacts:
-  #       Type: CODEPIPELINE
-  #     Source:
-  #       Type: CODEPIPELINE
-  #       BuildSpec: "frontend/buildspec.yaml"
-  #     Environment:
-  #       ComputeType: BUILD_GENERAL1_SMALL
-  #       Type: LINUX_CONTAINER
-  #       Image: "aws/codebuild/nodejs:10.1.0"
-  #       EnvironmentVariables:
-  #         DeployBucket: !Sub ${DeployBucket}
-  #         Distribution: 
-  #     TimeoutInMinutes: 5
+  FrontendBuild:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !If
+        - isProd
+        - !Sub ${ProjectName}-FrontendBuild
+        - !Sub ${ProjectName}-${Environment}-FrontendBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "frontend/buildspec.yaml"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/nodejs:10.1.0"
+        EnvironmentVariables:
+          DeployBucket: !Ref DeployBucket
+          Distribution: !Ref Distribution
+      TimeoutInMinutes: 5
 
   Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:
-      Name: !Sub ${AWS::StackName}-Pipeline
+      Name: !If
+        - isProd
+        - !Sub ${ProjectName}-Pipeline
+        - !Sub ${ProjectName}-${Environment}-Pipeline
       RoleArn: !GetAtt CodePipelineRole.Arn
       ArtifactStore:
         Type: S3
-        Location: !Ref ArtifactStoreBucket
+        Location: !Ref StackBucket
       Stages:
         - Name: Source
           Actions:
@@ -275,13 +326,16 @@ Resources:
               Configuration:
                 Owner: !Ref GithubOwner
                 Repo: !Ref GithubRepo
-                Branch: master
+                Branch: !If
+                - isProd
+                - master
+                - !Ref Environment
                 OAuthToken: !Ref GithubOAuthToken
               RunOrder: 1
         
         - Name: Build
           Actions:
-            - Name: Package-Lambda
+            - Name: API
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -295,7 +349,7 @@ Resources:
                 ProjectName: !Ref BackendBuild
               RunOrder: 1
 
-            - Name: Store-Templates
+            - Name: Template-Store
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -304,16 +358,16 @@ Resources:
               InputArtifacts:
                 - Name: Templates
               OutputArtifacts:
-                - Name: Master-Stack
+                - Name: Stack
               Configuration:
                 ProjectName: !Ref TemplateStoreBuild
               RunOrder: 2
 
-        - Name: Backend
+        - Name: Deploy
           Actions:
             - Name: Generate-Changeset
               InputArtifacts:
-                - Name: Master-Stack
+                - Name: Stack
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -321,12 +375,18 @@ Resources:
                 Provider: CloudFormation
               Configuration:
                 ActionMode: CHANGE_SET_REPLACE
-                StackName: !Sub ${AWS::StackName}-Backend
-                ChangeSetName: !Sub ${AWS::StackName}-Backend-Changeset
+                StackName: !If
+                  - isProd
+                  - !Sub ${ProjectName}
+                  - !Sub ${ProjectName}-${Environment}
+                ChangeSetName: !If
+                  - isProd
+                  - !Sub ${ProjectName}-Changeset
+                  - !Sub ${ProjectName}-${Environment}-Changeset
                 RoleArn: !GetAtt CloudFormationRole.Arn
-                Capabilities: CAPABILITY_IAM # IDK LOL
-                TemplatePath: Master-Stack::master.yaml
-                TemplateConfiguration: Master-Stack::config.json
+                Capabilities: CAPABILITY_IAM
+                TemplatePath: Stack::master.yaml
+                TemplateConfiguration: Stack::config.json
               RunOrder: 1
 
             - Name: Execute-Changeset
@@ -337,22 +397,28 @@ Resources:
                 Provider: CloudFormation
               Configuration:
                 ActionMode: CHANGE_SET_EXECUTE
-                StackName: !Sub ${AWS::StackName}-Backend
-                ChangeSetName: !Sub ${AWS::StackName}-Backend-Changeset
+                StackName: !If
+                  - isProd
+                  - !Sub ${ProjectName}
+                  - !Sub ${ProjectName}-${Environment}
+                ChangeSetName: !If
+                  - isProd
+                  - !Sub ${ProjectName}-Changeset
+                  - !Sub ${ProjectName}-${Environment}-Changeset
               RunOrder: 2
 
-        # - Name: Frontend
-        #   Actions:
-        #     - Name: Build
-        #       ActionTypeId:
-        #         Category: Build
-        #         Owner: AWS
-        #         Version: 1
-        #         Provider: CodeBuild
-        #       InputArtifacts:
-        #         - Name: App
-        #       OutputArtifacts:
-        #         - Name: Frontend
-        #       Configuration:
-        #         ProjectName: !Ref FrontendBuild
-        #       RunOrder: 1
+        - Name: Frontend
+          Actions:
+            - Name: Build-&-Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: Frontend
+              Configuration:
+                ProjectName: !Ref FrontendBuild
+              RunOrder: 1

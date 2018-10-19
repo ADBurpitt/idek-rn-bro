@@ -44,7 +44,7 @@ phases:
       - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template package.yaml
       
       - pip install docopt PyYAML aws-sam-translator
-      - python sam-translate.py --input-file="package.yaml" --output-file="../aws/lambda.json"
+      - python sam-translate.py --input-file="package.yaml" --output-file="../aws/API.json"
 
 artifacts:
   type: zip

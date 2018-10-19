@@ -2,7 +2,8 @@
   "Parameters" : {
     "TemplatePath": "TEMPLATE_PATH_PLACEHOLDER",
 
-    "DeployBucketId": "ID_PLACEHOLDER",
-    "DeployBucketDomain": "DOMAIN_PLACEHOLDER"
+    "Environment": "ENV_PLACEHOLDER",
+    "DomainName": "DOMAIN_PLACEHOLDER",
+    "CertificateArn": "CERT_PLACEHOLDER"
   }
 }
