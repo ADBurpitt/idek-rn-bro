@@ -224,7 +224,7 @@ Resources:
               
               - Effect: Allow
                 Action: "cloudfront:CreateInvalidation"
-                Resource: !GetAtt Distribution.Arn
+                Resource: "*"
 
   ApiBuild:
     Type: "AWS::CodeBuild::Project"
