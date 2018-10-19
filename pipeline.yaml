@@ -8,6 +8,10 @@ Parameters:
   ProjectName:
     Type: String
     Description: "Project Name"
+  ProjectNameLowercase:
+    Type: String
+    Description: "For bucket names"
+
   DomainName:
     Type: String
   CertificateArn:
@@ -43,16 +47,16 @@ Resources:
     Properties:
       BucketName: !If
         - isProd
-        - !Sub ${ProjectName}-stack-bucket
-        - !Sub ${ProjectName}-${Environment}-stack-bucket
+        - !Sub ${ProjectNameLowercase}-stack-bucket
+        - !Sub ${ProjectNameLowercase}-${Environment}-stack-bucket
       
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !If
         - isProd
-        - !Sub ${ProjectName}-frontend-bucket
-        - !Sub ${ProjectName}-${Environment}-frontend-bucket
+        - !Sub ${ProjectNameLowercase}-frontend-bucket
+        - !Sub ${ProjectNameLowercase}-${Environment}-frontend-bucket
       WebsiteConfiguration:
         IndexDocument: index.html
   
@@ -297,8 +301,10 @@ Resources:
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/nodejs:10.1.0"
         EnvironmentVariables:
-          DeployBucket: !Ref FrontendBucket
-          Distribution: !Ref Distribution
+          - Name: DeployBucket
+            Value: !Ref FrontendBucket
+          - Name: Distribution
+            Value: !Ref Distribution
       TimeoutInMinutes: 5
 
   Pipeline:
