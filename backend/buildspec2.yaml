@@ -46,7 +46,7 @@ phases:
       - pip install docopt PyYAML aws-sam-translator
       - python sam-translate.py --input-file="api-package.yaml" --output-file="../aws2/API.json"
 
-      - pip install --upgrade boto3
+      - pip install --upgrade awscli
       - aws cloudformation package --template ../aws2/master.yaml --s3-bucket ${BUCKET} --output-template master.yaml
 
 artifacts:
