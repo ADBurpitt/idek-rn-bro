@@ -52,4 +52,4 @@ phases:
 artifacts:
   type: zip
   files:
-    - master.yaml
+    - backend/master.yaml
