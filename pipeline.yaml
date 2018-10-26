@@ -64,6 +64,11 @@ Resources:
     Type: "AWS::CloudFront::Distribution"
     Properties:
       DistributionConfig:
+        Aliases:
+          - !If
+            - isProd
+            - !Sub app.${DomainName}
+            - !Sub ${Environment}.app.${DomainName}
         Comment: !If
           - isProd
           - !Sub ${ProjectName}-Distribution
@@ -73,6 +78,9 @@ Resources:
             Id: !Ref FrontendBucket
             S3OriginConfig:
               OriginAccessIdentity: ''
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
         DefaultRootObject: index.html
         Enabled: true
         DefaultCacheBehavior: 
@@ -82,6 +90,20 @@ Resources:
             QueryString: true
           TargetOriginId: !Ref FrontendBucket
           ViewerProtocolPolicy: "redirect-to-https"
+
+  FrontendDNSRecord:
+    Type: AWS::Route53::RecordSet
+    DependsOn: Distribution
+    Properties:
+      HostedZoneName: !Sub ${DomainName}.
+      Name: !If
+        - isProd
+        - !Sub app.${DomainName}
+        - !Sub ${Environment}.app.${DomainName}
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2 # For cloudfront distributions.
 
   CodePipelineRole:
     Type: "AWS::IAM::Role"
@@ -176,14 +198,19 @@ Resources:
                   - isProd
                   - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}*
                   - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-${Environment}*
-                
+              
               - Effect: "Allow"
                 Action: "apigateway:*"
-                Resource: !If
-                  - isProd
-                  - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}*
-                  - !Sub arn:aws:apigateway:${AWS::Region}::${AWS::AccountId}:/${ProjectName}-${Environment}*
-                
+                Resource: "*"
+
+              - Effect: "Allow"
+                Action: "cloudfront:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "route53:*"
+                Resource: "*"
+
   CodeBuildRole:
     Type: "AWS::IAM::Role"
     Properties:

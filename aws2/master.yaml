@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Infrastructure
+
+Parameters:
+  Environment:
+    Type: String
+  DomainName:
+    Type: String
+  CertificateArn:
+    Type: String
+
+Resources:
+  Storage:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: storage.yaml
+
+  API:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: API.json
+  
+  ApiDNS:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: API
+    Properties:
+      TemplateURL: API-DNS.yaml
+      Parameters:
+        Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+        RestApiId: !GetAtt API.Outputs.RestApiId
+
+  FrontendDNS:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: Storage
+    Properties:
+      TemplateURL: frontend-DNS.yaml
+      Parameters:
+        Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+        FrontendBucket: !GetAtt Storage.Outputs.FrontendBucket
+        FrontendBucketDomainName: !GetAtt Storage.Outputs.FrontendBucketDomainName
+
+  Cognito:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: cognito.yaml
+      Parameters:
+        Environment: !Ref Environment
+
+  Codebuild:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn:
+      - Storage
+      - API
+      - Cognito
+    Properties:
+      TemplateURL: codebuild.yaml
+      Parameters:
+        Environment: !Ref Environment
+        TemplateBucket: !GetAtt Storage.Outputs.TemplateBucket
+        FrontendBucket: !GetAtt Storage.Outputs.FrontendBucket
+        Distribution: !GetAtt FrontendDNS.Outputs.Distribution
+        IdentityPool: !GetAtt Cognito.Outputs.IdentityPoolId
+        UserPool: !GetAtt Cognito.Outputs.UserPoolId
+        UserPoolWebClient: !GetAtt Cognito.Outputs.UserPoolClientId
+  
+Outputs:
+    StackName:
+      Value: !Ref AWS::StackName
+    ApiBuild:
+      Value: !GetAtt Codebuild.Outputs.ApiBuild
+    FrontendBuild:
+      Value: !GetAtt Codebuild.Outputs.FrontendBuild

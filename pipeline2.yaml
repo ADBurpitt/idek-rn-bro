@@ -1,0 +1,203 @@
+Description: CodePipeline
+
+Parameters:
+  StackName:
+    Type: String
+  Environment:
+    Type: String
+    Default: ''
+
+  ProjectSource:
+    Type: String
+    Description: "Source URL"
+  GithubOwner:
+    Type: String
+    Default: ADBurpitt
+    Description: "Github repo owner"
+  GithubRepo:
+    Type: String
+    Default: idek-rn-bro
+    Description: "Github repo name"
+  GithubOAuthToken:
+    Type: String
+    Description: "Github access token"
+  
+  ApiBuild:
+    Type: String
+  FrontendBuild:
+    Type: String
+
+Conditions:
+  isProd: !Equals
+    - !Ref Environment
+    - ''
+
+Resources:
+  ArtifactStore:
+    Type: AWS::S3::Bucket
+
+  CodePipelineRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "codepipeline.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CodePipelineAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+         
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+                
+              - Effect: "Allow"
+                Action: "codebuild:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "iam:PassRole"
+                Resource: "*"
+
+  CloudFormationRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "cloudformation.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CloudFormationAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "iam:*"
+                Resource: "*"
+
+              - Effect: "Allow"
+                Action: "lambda:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "apigateway:*"
+                Resource: "*"
+
+              - Effect: "Allow"
+                Action: "cloudfront:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "route53:*"
+                Resource: "*"
+
+  Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Ref AWS::StackName
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactStore
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: GitHub
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              OutputArtifacts:
+                - Name: App
+              Configuration:
+                Owner: !Ref GithubOwner
+                Repo: !Ref GithubRepo
+                Branch: !If
+                  - isProd
+                  - master
+                  - !Ref Environment
+                OAuthToken: !Ref GithubOAuthToken
+              RunOrder: 1
+        
+        - Name: Build
+          Actions:
+            - Name: API
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: Template
+              Configuration:
+                ProjectName: !Ref ApiBuild
+              RunOrder: 1
+
+        - Name: Deploy
+          Actions:
+            - Name: Generate-Changeset
+              InputArtifacts:
+                - Name: Template
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                StackName: !Ref StackName
+                ChangeSetName: !Sub ${StackName}-Changeset
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                Capabilities: CAPABILITY_IAM
+                TemplatePath: Template::master.yaml
+              RunOrder: 1
+
+            - Name: Execute-Changeset
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                StackName: !Ref StackName
+                ChangeSetName: !Sub ${StackName}-Changeset
+              RunOrder: 2
+
+        - Name: Frontend
+          Actions:
+            - Name: Build-and-Deploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: Frontend
+              Configuration:
+                ProjectName: !Ref FrontendBuild
+              RunOrder: 1

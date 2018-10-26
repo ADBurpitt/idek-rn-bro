@@ -1,0 +1,6 @@
+
+
+Master stack that creates pipeline as nested stack dependant on the other stacks.
+
+Specify FrontendBuild project name in pipeline, define resource in infrastructure stack so that
+env variables can be referenced from adjacent nested stack outputs.

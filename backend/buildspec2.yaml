@@ -1,0 +1,54 @@
+version: 0.2
+
+phases:
+
+  install:
+    commands:
+
+      # AWS Codebuild Go images use /go for the $GOPATH so let's symlink our
+      # application source code into that directory structure.
+      - ln -s "${CODEBUILD_SRC_DIR}/backend" "/go/src"
+
+      # Install golint
+      - go get -u golang.org/x/lint/golint
+
+      # Install Testify to use common assertions and mocks in tests
+      - go get -u github.com/stretchr/testify
+
+  pre_build:
+    commands:
+
+      # Make sure we're in the project directory within our GOPATH
+      - cd "/go/src/backend"
+
+      # Fetch all dependencies
+      - go get ./...
+
+      # Ensure code passes all lint tests
+      - golint -set_exit_status
+
+      # Check for common Go application problems with 'go tool vet'
+      - go tool vet .
+
+      # Run all tests included with our application
+      - go test ./...
+
+  build:
+    commands:
+
+      # Build our go application
+      - chmod +x ./build.sh
+      - ./build.sh
+
+      # Package application with AWS CloudFormation/SAM
+      - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template api-package.yaml
+      
+      - pip install docopt PyYAML aws-sam-translator
+      - python sam-translate.py --input-file="api-package.yaml" --output-file="../aws2/API.json"
+
+      - aws cloudformation package --template ../aws2/master.yaml --s3-bucket ${BUCKET} --output-template master.yaml
+
+artifacts:
+  type: zip
+  files:
+    - master.yaml

@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: API
+Globals:
+  Api:
+    Cors: '''*'''
+    EndpointConfiguration: EDGE
+  Function:
+    Handler: main
+    Runtime: go1.x
+    Timeout: 5
+Outputs:
+  HelloWorldAPI:
+    Description: API Gateway endpoint URL for Prod environment for First Function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  HelloWorldFunction:
+    Description: First Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - HelloWorldFunction
+      - Arn
+  HelloWorldFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - HelloWorldFunctionRole
+      - Arn
+  RestApiId:
+    Description: Implicit serverless rest api ID
+    Value:
+      Ref: ServerlessRestApi
+Resources:
+  BaseFunc:
+    Properties:
+      CodeUri: s3://frankfurt-templates/7a1a0faf6ddb74e0f1368d8a66c117c6
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Events:
+        CatchAll:
+          Properties:
+            Method: GET
+            Path: /
+          Type: Api
+    Type: AWS::Serverless::Function
+  HelloWorldFunction:
+    Properties:
+      CodeUri: s3://frankfurt-templates/7a1a0faf6ddb74e0f1368d8a66c117c6
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Events:
+        CatchAll:
+          Properties:
+            Method: GET
+            Path: /hello
+          Type: Api
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
