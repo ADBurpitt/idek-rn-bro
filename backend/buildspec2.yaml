@@ -50,6 +50,6 @@ phases:
       - aws cloudformation package --template ../aws2/master.yaml --s3-bucket ${BUCKET} --output-template master.yaml
 
 artifacts:
-  type: zip
+  base-directory: backend
   files:
-    - backend/master.yaml
+    - master.yaml
