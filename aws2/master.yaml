@@ -60,6 +60,8 @@ Resources:
       TemplateURL: codebuild.yaml
       Parameters:
         Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
         TemplateBucket: !GetAtt Storage.Outputs.TemplateBucket
         FrontendBucket: !GetAtt Storage.Outputs.FrontendBucket
         Distribution: !GetAtt FrontendDNS.Outputs.Distribution
