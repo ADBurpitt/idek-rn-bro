@@ -65,6 +65,5 @@ phases:
       #   sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
 
 artifacts:
-  base-directory: aws2/output
   files:
-    - *
+    - aws2/output/*
