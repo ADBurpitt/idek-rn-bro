@@ -48,19 +48,23 @@ phases:
 
       - pip install --upgrade awscli
       - aws cloudformation package --template ../aws2/master.yaml --s3-bucket ${BUCKET} --output-template ../aws2/output/master.yaml
-      
-      - cd ../aws2/output
-      - |
-        echo "Replacing \"ENV_PLACEHOLDER\" for \"$ENVIRONMENT\" in config.json"
-        sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
-      - |
-        echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DOMAIN\" in config.json"
-        sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN/" config.json
-      - |
-        echo "Replacing \"CERT_PLACEHOLDER\" for \"$CERTIFICATE\" in config.json"
-        sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
+
+      - ls
+      - cd ..
+      - ls
+
+      # - cd ../aws2/output
+      # - |
+      #   echo "Replacing \"ENV_PLACEHOLDER\" for \"$ENVIRONMENT\" in config.json"
+      #   sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
+      # - |
+      #   echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DOMAIN\" in config.json"
+      #   sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN/" config.json
+      # - |
+      #   echo "Replacing \"CERT_PLACEHOLDER\" for \"$CERTIFICATE\" in config.json"
+      #   sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
 
 artifacts:
-  base-directory: backend
+  base-directory: aws2/output
   files:
-    - master.yaml
+    - *
