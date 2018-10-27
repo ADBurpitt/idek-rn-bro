@@ -43,6 +43,10 @@ Resources:
           Fn::GetAtt:
           - Infrastructure
           - Outputs.ApiBuild
+        CertificateArn:
+          Ref: CertificateArn
+        DomainName:
+          Ref: DomainName
         Environment:
           Ref: Environment
         FrontendBuild:
@@ -61,5 +65,5 @@ Resources:
           Fn::GetAtt:
           - Infrastructure
           - Outputs.StackName
-      TemplateURL: https://s3.amazonaws.com/frankfurt-templates/fb4cc3a674098705008a92050b633282.template
+      TemplateURL: https://s3.amazonaws.com/frankfurt-templates/7567b05c8c74682a07d33a610b1265f4.template
     Type: AWS::CloudFormation::Stack

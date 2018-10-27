@@ -1,11 +1,13 @@
 Description: CodePipeline
 
 Parameters:
-  StackName:
-    Type: String
   Environment:
     Type: String
     Default: ''
+  DomainName:
+    Type: String
+  CertificateArn:
+    Type: String
 
   ProjectSource:
     Type: String
@@ -21,7 +23,9 @@ Parameters:
   GithubOAuthToken:
     Type: String
     Description: "Github access token"
-  
+
+  StackName:
+    Type: String
   ApiBuild:
     Type: String
   FrontendBuild:
@@ -172,6 +176,7 @@ Resources:
                 RoleArn: !GetAtt CloudFormationRole.Arn
                 Capabilities: CAPABILITY_IAM
                 TemplatePath: Template::master.yaml
+                TemplateConfiguration: Template::config.json
               RunOrder: 1
 
             - Name: Execute-Changeset

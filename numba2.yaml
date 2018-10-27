@@ -43,6 +43,8 @@ Resources:
       TemplateURL: pipeline2.yaml
       Parameters:
         Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
         StackName: !GetAtt Infrastructure.Outputs.StackName
         ProjectSource: !Ref ProjectSource
         GithubOwner: !Ref GithubOwner
