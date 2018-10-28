@@ -20,6 +20,12 @@ phases:
   build:
     commands:
 
+      - sed -i -e "s/#API_URL/$API_URL/" src/config/index.js
+      - sed -i -e "s/REGION/$REGION/" src/config/index.js
+      - sed -i -e "s/USER_POOL/$USER_POOL/" src/config/index.js
+      - sed -i -e "s/WEB_CLIENT/$WEB_CLIENT/" src/config/index.js
+      - sed -i -e "s/IDENTITY_POOL/$IDENTITY_POOL/" src/config/index.js
+
       # Disable sourcemap and builds
       - GENERATE_SOURCEMAP=false npm run build
 
@@ -27,28 +33,21 @@ phases:
     commands:
 
       # Copy the contents of /build to S3
-      - aws s3 cp --recursive --acl public-read ./build s3://${DeployBucket}/ 
+      - aws s3 cp --recursive --acl public-read ./build s3://${DEPLOY_BUCKET}/ 
       # set the cache-control headers for service-worker.js to prevent
       # browser caching
       - >
         aws s3 cp --acl public-read 
         --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
-        ./build/service-worker.js s3://${DeployBucket}/
+        ./build/service-worker.js s3://${DEPLOY_BUCKET}/
       # set the cache-control headers for index.html to prevent
       # browser caching
       - >
         aws s3 cp --acl public-read 
         --cache-control="max-age=0, no-cache, no-store, must-revalidate" 
-        ./build/index.html s3://${DeployBucket}/
+        ./build/index.html s3://${DEPLOY_BUCKET}/
       # invalidate the CloudFront cache for index.html and service-worker.js
       # to force CloudFront to update its edge locations with the new versions
       - >
-        aws cloudfront create-invalidation --distribution-id ${Distribution} 
+        aws cloudfront create-invalidation --distribution-id ${DISTRIBUTION} 
         --paths /index.html /service-worker.js
-
-artifacts:
-  base-directory: frontend
-  type: zip
-  files:
-    - template.yaml
-  

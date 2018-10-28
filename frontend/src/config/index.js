@@ -1,7 +1,9 @@
 
 export const poolData = {
-  region: "",
-  userPoolId: "",
-  userPoolWebClientId: "",
-  identityPoolId: ""
+  region: "REGION",
+  userPoolId: "USER_POOL",
+  userPoolWebClientId: "WEB_CLIENT",
+  identityPoolId: "IDENTITY_POOL"
 }
+
+export const API_URL = "#API_URL"

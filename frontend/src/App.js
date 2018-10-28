@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
-// import Amplify from 'aws-amplify'
+import Amplify from 'aws-amplify'
 import axios from 'axios'
 
 import logo from './logo.svg'
 import './App.css'
-// import { poolData, apiUrl } from 'config'
+import { poolData, API_URL } from 'config'
 
-// Amplify.configure({
-//   Auth: poolData
-// })
+Amplify.configure({
+  Auth: poolData
+})
 
 class App extends Component {
 
@@ -16,7 +16,7 @@ class App extends Component {
 
   handleClick = async () => {
     console.log('hey')
-    const { data } = await axios.get('http://localhost:3001/hello') 
+    const { data } = await axios.get(`${API_URL}/hello`) 
     this.setState({ data })
   }
 

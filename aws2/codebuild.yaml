@@ -135,15 +135,22 @@ Resources:
         Type: LINUX_CONTAINER
         Image: "aws/codebuild/nodejs:10.1.0"
         EnvironmentVariables:
-          - Name: DeployBucket
+          - Name: DEPLOY_BUCKET
             Value: !Ref FrontendBucket
-          - Name: Distribution
+          - Name: DISTRIBUTION
             Value: !Ref Distribution
-          - Name: IdentityPool
+          - Name: API_URL
+            Value: !If
+              - isProd
+              - !Sub api.test.${DomainName}
+              - !Sub ${Environment}.api.test.${DomainName}
+          - Name: REGION
+            Value: !Ref AWS::Region
+          - Name: IDENTITY_POOL
             Value: !Ref IdentityPool
-          - Name: UserPool
+          - Name: USER_POOL
             Value: !Ref UserPool
-          - Name: UserPoolWebClient
+          - Name: WEB_CLIENT
             Value: !Ref UserPoolWebClient
       TimeoutInMinutes: 5
 
