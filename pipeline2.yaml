@@ -114,6 +114,10 @@ Resources:
                 Action: "route53:*"
                 Resource: "*"
 
+              - Effect: "Allow"
+                Action: "codebuild:*"
+                Resource: "*"
+
   Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
     Properties:

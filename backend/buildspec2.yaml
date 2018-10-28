@@ -52,15 +52,9 @@ phases:
       - cd ${CODEBUILD_SRC_DIR}/aws2/output
       - ls
 
-      - |
-        echo "Replacing \"ENV_PLACEHOLDER\" for \"$ENVIRONMENT\" in config.json"
-        sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
-      - |
-        echo "Replacing \"DOMAIN_PLACEHOLDER\" for \"$DOMAIN\" in config.json"
-        sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN/" config.json
-      - |
-        echo "Replacing \"CERT_PLACEHOLDER\" for \"$CERTIFICATE\" in config.json"
-        sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
+      - sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
+      - sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN/" config.json
+      - sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
 
 artifacts:
   base-directory: aws2/output
