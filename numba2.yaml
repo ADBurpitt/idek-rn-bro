@@ -51,4 +51,4 @@ Resources:
         GithubRepo: !Ref GithubRepo
         GithubOAuthToken: !Ref GithubOAuthToken
         ApiBuild: !GetAtt Infrastructure.Outputs.ApiBuild
-        FrontendBuild: !GetAtt Infrastructure.Outputs.ApiBuild
+        FrontendBuild: !GetAtt Infrastructure.Outputs.FrontendBuild

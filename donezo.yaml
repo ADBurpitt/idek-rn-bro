@@ -52,7 +52,7 @@ Resources:
         FrontendBuild:
           Fn::GetAtt:
           - Infrastructure
-          - Outputs.ApiBuild
+          - Outputs.FrontendBuild
         GithubOAuthToken:
           Ref: GithubOAuthToken
         GithubOwner:
