@@ -16,7 +16,7 @@ class App extends Component {
 
   handleClick = async () => {
     console.log('hey')
-    const { data } = await axios.get(`${API_URL}/hello`) 
+    const { data } = await axios.get(`${API_URL}/hello`)
     this.setState({ data })
   }
 
