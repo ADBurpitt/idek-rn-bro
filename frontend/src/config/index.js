@@ -6,4 +6,4 @@ export const poolData = {
   identityPoolId: "IDENTITY_POOL"
 }
 
-export const API_URL = "#API_URL"
+export const API_URL = "https://#API_URL"
