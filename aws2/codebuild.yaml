@@ -142,8 +142,8 @@ Resources:
           - Name: API_URL
             Value: !If
               - isProd
-              - !Sub api.test.${DomainName}
-              - !Sub ${Environment}.api.test.${DomainName}
+              - !Sub api.${DomainName}
+              - !Sub ${Environment}.api.${DomainName}
           - Name: REGION
             Value: !Ref AWS::Region
           - Name: IDENTITY_POOL

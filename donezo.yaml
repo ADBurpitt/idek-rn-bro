@@ -33,7 +33,7 @@ Resources:
           Ref: DomainName
         Environment:
           Ref: Environment
-      TemplateURL: https://s3.amazonaws.com/frankfurt-templates/9746a165fbb3f4f66f68687057845d05.template
+      TemplateURL: https://s3.amazonaws.com/numba2/ab4c77093b7aaf6a2420f72f0073c3ae.template
     Type: AWS::CloudFormation::Stack
   Pipeline:
     DependsOn: Infrastructure
@@ -65,5 +65,5 @@ Resources:
           Fn::GetAtt:
           - Infrastructure
           - Outputs.StackName
-      TemplateURL: https://s3.amazonaws.com/frankfurt-templates/a18b7fe67370d45cd0c93dfad489eadc.template
+      TemplateURL: https://s3.amazonaws.com/numba2/a18b7fe67370d45cd0c93dfad489eadc.template
     Type: AWS::CloudFormation::Stack

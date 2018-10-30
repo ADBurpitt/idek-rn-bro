@@ -59,8 +59,8 @@
       "Type": "AWS::Lambda::Function", 
       "Properties": {
         "Code": {
-          "S3Bucket": "frankfurt-templates", 
-          "S3Key": "7a1a0faf6ddb74e0f1368d8a66c117c6"
+          "S3Bucket": "numba2", 
+          "S3Key": "7f4e53f63735e676e549955bf782fe46"
         }, 
         "Tags": [
           {
@@ -349,8 +349,8 @@
       "Type": "AWS::Lambda::Function", 
       "Properties": {
         "Code": {
-          "S3Bucket": "frankfurt-templates", 
-          "S3Key": "7a1a0faf6ddb74e0f1368d8a66c117c6"
+          "S3Bucket": "numba2", 
+          "S3Key": "7f4e53f63735e676e549955bf782fe46"
         }, 
         "Tags": [
           {

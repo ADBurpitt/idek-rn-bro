@@ -26,8 +26,8 @@ Resources:
         Aliases:
           - !If
             - isProd
-            - !Sub app.test.${DomainName}
-            - !Sub ${Environment}.app.test.${DomainName}
+            - !Sub app.${DomainName}
+            - !Sub ${Environment}.app.${DomainName}
         Comment: !If
           - isProd
           - !Sub ${AWS::StackName}-Distribution
@@ -57,8 +57,8 @@ Resources:
       HostedZoneName: !Sub ${DomainName}.
       Name: !If
         - isProd
-        - !Sub app.test.${DomainName}
-        - !Sub ${Environment}.app.test.${DomainName}
+        - !Sub app.${DomainName}
+        - !Sub ${Environment}.app.${DomainName}
       Type: A
       AliasTarget:
         DNSName: !GetAtt Distribution.DomainName
