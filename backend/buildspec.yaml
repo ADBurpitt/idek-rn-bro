@@ -41,12 +41,23 @@ phases:
       - ./build.sh
 
       # Package application with AWS CloudFormation/SAM
-      - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template package.yaml
+      - aws cloudformation package --template template.yaml --s3-bucket ${BUCKET} --output-template api-package.yaml
       
       - pip install docopt PyYAML aws-sam-translator
-      - python sam-translate.py --input-file="package.yaml" --output-file="../aws/API.json"
+      - python sam-translate.py --input-file="api-package.yaml" --output-file="../aws/API.json"
+
+      - pip install --upgrade awscli
+      - aws cloudformation package --template ../aws/infrastructure.yaml --s3-bucket ${BUCKET} --output-template ../aws/output/infrastructure.yaml
+
+      - cd ${CODEBUILD_SRC_DIR}/aws/output
+      - ls
+
+      - sed -i -e "s/ENV_PLACEHOLDER/$ENVIRONMENT/" config.json
+      - sed -i -e "s/DOMAIN_PLACEHOLDER/$DOMAIN/" config.json
+      - sed -i -e "s#CERT_PLACEHOLDER#$CERTIFICATE#" config.json
 
 artifacts:
-  type: zip
+  base-directory: aws/output
   files:
-    - aws/*
+    - infrastructure.yaml
+    - config.json

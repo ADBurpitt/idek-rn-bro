@@ -1,0 +1,54 @@
+Description: Master stack
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: hyperboa.com
+  CertificateArn:
+    Type: String
+  Environment:
+    Type: String
+    Default: ''
+
+  ProjectSource:
+    Type: String
+    Default: "https://github.com/adburpitt/idek-rn-bro"
+    Description: "Source URL"
+  GithubOwner:
+    Type: String
+    Default: ADBurpitt
+    Description: "Github repo owner"
+  GithubRepo:
+    Type: String
+    Default: idek-rn-bro
+    Description: "Github repo name"
+  GithubOAuthToken:
+    Type: String
+    Description: "Github access token"
+
+Resources:
+  Infrastructure:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: aws/infrastructure.yaml
+      Parameters:
+        Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+
+  Pipeline:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: Infrastructure
+    Properties:
+      TemplateURL: aws/pipeline.yaml
+      Parameters:
+        Environment: !Ref Environment
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+        StackName: !GetAtt Infrastructure.Outputs.StackName
+        ProjectSource: !Ref ProjectSource
+        GithubOwner: !Ref GithubOwner
+        GithubRepo: !Ref GithubRepo
+        GithubOAuthToken: !Ref GithubOAuthToken
+        ApiBuild: !GetAtt Infrastructure.Outputs.ApiBuild
+        FrontendBuild: !GetAtt Infrastructure.Outputs.FrontendBuild

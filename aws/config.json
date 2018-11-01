@@ -1,9 +1,0 @@
-{
-  "Parameters" : {
-    "TemplatePath": "TEMPLATE_PATH_PLACEHOLDER",
-
-    "Environment": "ENV_PLACEHOLDER",
-    "DomainName": "DOMAIN_PLACEHOLDER",
-    "CertificateArn": "CERT_PLACEHOLDER"
-  }
-}

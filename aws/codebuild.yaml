@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Codebuild
+
+Parameters:
+  Environment:
+    Type: String
+  DomainName:
+    Type: String
+  CertificateArn:
+    Type: String
+  TemplateBucket:
+    Type: String
+  FrontendBucket:
+    Type: String
+  Distribution:
+    Type: String
+  IdentityPool:
+    Type: String
+  UserPool:
+    Type: String
+  UserPoolWebClient:
+    Type: String
+
+Conditions:
+  isProd: !Equals
+    - !Ref Environment
+    - ''
+
+Resources:
+  CodeBuildRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "codebuild.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "CodeBuildAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "cloudformation:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "cloudformation:ValidateTemplate"
+                Resource: "*"
+
+              - Effect: "Allow"
+                Action: "logs:*"
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "iam:ListPolicies"
+                Resource: "*"
+              
+              - Effect: Allow
+                Action: "cloudfront:CreateInvalidation"
+                Resource: "*"
+
+  ApiBuild:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !If
+        - isProd
+        - !Sub ${AWS::StackName}-ApiBuild
+        - !Sub ${AWS::StackName}-${Environment}-ApiBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "backend/buildspec.yaml"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/golang:1.10"
+        EnvironmentVariables:
+          - Name: BUCKET
+            Value: !Ref TemplateBucket
+          - Name: ENVIRONMENT
+            Value: !Ref Environment
+          - Name: DOMAIN
+            Value: !Ref DomainName
+          - Name: CERTIFICATE
+            Value: !Ref CertificateArn
+      TimeoutInMinutes: 5
+
+  FrontendBuild:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !If
+        - isProd
+        - !Sub ${AWS::StackName}-FrontendBuild
+        - !Sub ${AWS::StackName}-${Environment}-FrontendBuild
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: "frontend/buildspec.yaml"
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/nodejs:10.1.0"
+        EnvironmentVariables:
+          - Name: DEPLOY_BUCKET
+            Value: !Ref FrontendBucket
+          - Name: DISTRIBUTION
+            Value: !Ref Distribution
+          - Name: API_URL
+            Value: !If
+              - isProd
+              - !Sub api.${DomainName}
+              - !Sub ${Environment}.api.${DomainName}
+          - Name: REGION
+            Value: !Ref AWS::Region
+          - Name: IDENTITY_POOL
+            Value: !Ref IdentityPool
+          - Name: USER_POOL
+            Value: !Ref UserPool
+          - Name: WEB_CLIENT
+            Value: !Ref UserPoolWebClient
+      TimeoutInMinutes: 5
+
+Outputs:
+  ApiBuild:
+    Value: !Ref ApiBuild
+  FrontendBuild:
+    Value: !Ref FrontendBuild
