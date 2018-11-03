@@ -53,6 +53,7 @@ Resources:
       CognitoIdentityProviders: 
         - ClientId: !Ref UserPoolClient
           ProviderName: !GetAtt UserPool.ProviderName
+      ExplicitAuthFlows: USER_PASSWORD_AUTH
 
   # Create a role for unauthorized acces to AWS resources. Very limited access. Only allows users in the previously created Identity Pool
   CognitoUnAuthorizedRole:
@@ -128,13 +129,9 @@ Resources:
 Outputs:
   UserPoolId:
     Value: !Ref UserPool
-    Export:
-      Name: "UserPool::Id"
+  UserPoolArn:
+    Value: !GetAtt UserPool.Arn
   UserPoolClientId:
     Value: !Ref UserPoolClient
-    Export:
-      Name: "UserPoolClient::Id"
   IdentityPoolId:
     Value: !Ref IdentityPool
-    Export:
-      Name: "IdentityPool::Id"

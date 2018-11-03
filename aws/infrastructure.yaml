@@ -15,10 +15,20 @@ Resources:
     Properties:
       TemplateURL: storage.yaml
 
-  API:
+  Cognito:
     Type: "AWS::CloudFormation::Stack"
     Properties:
+      TemplateURL: cognito.yaml
+      Parameters:
+        Environment: !Ref Environment
+
+  API:
+    Type: "AWS::CloudFormation::Stack"
+    DependsOn: Cognito
+    Properties:
       TemplateURL: API.json
+      Parameters:
+        PoolArn: !GetAtt Cognito.Outputs.UserPoolArn
   
   ApiDNS:
     Type: "AWS::CloudFormation::Stack"
@@ -43,12 +53,7 @@ Resources:
         FrontendBucket: !GetAtt Storage.Outputs.FrontendBucket
         FrontendBucketDomainName: !GetAtt Storage.Outputs.FrontendBucketDomainName
 
-  Cognito:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: cognito.yaml
-      Parameters:
-        Environment: !Ref Environment
+
 
   Codebuild:
     Type: "AWS::CloudFormation::Stack"
