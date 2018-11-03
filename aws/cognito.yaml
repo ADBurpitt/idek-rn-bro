@@ -44,7 +44,8 @@ Resources:
     Properties:
       GenerateSecret: false
       UserPoolId: !Ref UserPool
-      ExplicitAuthFlows: USER_PASSWORD_AUTH
+      ExplicitAuthFlows:
+        - USER_PASSWORD_AUTH
   
   # Creates a federeated Identity pool
   IdentityPool:
