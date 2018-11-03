@@ -44,6 +44,7 @@ Resources:
     Properties:
       GenerateSecret: false
       UserPoolId: !Ref UserPool
+      ExplicitAuthFlows: USER_PASSWORD_AUTH
   
   # Creates a federeated Identity pool
   IdentityPool:
@@ -53,7 +54,6 @@ Resources:
       CognitoIdentityProviders: 
         - ClientId: !Ref UserPoolClient
           ProviderName: !GetAtt UserPool.ProviderName
-      ExplicitAuthFlows: USER_PASSWORD_AUTH
 
   # Create a role for unauthorized acces to AWS resources. Very limited access. Only allows users in the previously created Identity Pool
   CognitoUnAuthorizedRole:
