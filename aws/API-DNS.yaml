@@ -35,7 +35,7 @@ Resources:
         - !Sub api.${DomainName}
         - !Sub ${Environment}.api.${DomainName}
       RestApiId: !Ref RestApiId
-      Stage: Prod
+      Stage: api
 
   DNSRecord:
     Type: AWS::Route53::RecordSet
