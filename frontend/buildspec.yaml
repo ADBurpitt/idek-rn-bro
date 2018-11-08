@@ -8,11 +8,11 @@ phases:
       # Make sure we're in the frontend directory
       - cd "${CODEBUILD_SRC_DIR}/frontend"
 
-      - sed -i -e "s/#API_URL/$API_URL/" src/config/index.js
-      - sed -i -e "s/REGION/$REGION/" src/config/index.js
-      - sed -i -e "s/USER_POOL/$USER_POOL/" src/config/index.js
-      - sed -i -e "s/WEB_CLIENT/$WEB_CLIENT/" src/config/index.js
-      - sed -i -e "s/IDENTITY_POOL/$IDENTITY_POOL/" src/config/index.js
+      - sed -i -e "s/%API_URL/$API_URL/" .env.production
+      - sed -i -e "s/%REGION/$REGION/" .env.production
+      - sed -i -e "s/%USER_POOL/$USER_POOL/" .env.production
+      - sed -i -e "s/%WEB_CLIENT/$WEB_CLIENT/" .env.production
+      - sed -i -e "s/%IDENTITY_POOL/$IDENTITY_POOL/" .env.production
 
       # Install dependancies
       - npm install
