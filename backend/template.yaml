@@ -13,11 +13,10 @@ Globals:
     Handler: main
 
 Resources:
-  ServerlessRestApi:
-    Type: AWS::Serverless:Api
+  RestApi:
+    Type: AWS::Serverless::Api
     Properties:
-      EndpointConfiguration: EDGE
-      Cors: "'*'"
+      StageName: api
       Auth:
         DefaultAuthorizer: Cognito
         Authorizers:
@@ -33,7 +32,7 @@ Resources:
         CatchAll:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            RestApiId: !Ref ServerlessRestApi
+            RestApiId: !Ref RestApi
             Path: /hello
             Method: GET
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
@@ -43,7 +42,7 @@ Resources:
 Outputs:
   HelloWorldAPI:
     Description: "API Gateway endpoint URL for Prod environment for First Function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
 
   HelloWorldFunction:
     Description: "First Lambda Function ARN"
@@ -55,4 +54,4 @@ Outputs:
 
   RestApiId:
     Description: "Implicit serverless rest api ID"
-    Value: !Ref ServerlessRestApi
+    Value: !Ref RestApi
