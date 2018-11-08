@@ -15,7 +15,7 @@ class App extends Component {
 
   state = { data: '', session: null }
 
-  handleClick = async () => {
+  getIP = async () => {
     const { data } = await axios.get(`${API_URL}/hello`)
     this.setState({ data })
   }
@@ -25,6 +25,8 @@ class App extends Component {
     this.setState({ session })
   }
 
+  logSession = () => console.log(this.session)
+
   render() {
     return (
       <div className="App">
@@ -32,14 +34,20 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <Container>
             <Row>
-              <Col><Button>Get IP</Button></Col>
+              <Col><Button onClick={this.getIP} >Get IP</Button></Col>
               <Col>IP:</Col>
               <Col>{this.state.data}</Col>
             </Row>
             <br />
             <Row>
-              <Col><Button color="primary" >Get Session</Button></Col>
-              <Col>{ this.state.session && <Button color="success">Log Session</Button>}</Col>
+              <Col><Button color="primary" onClick={this.getSession}>Get Session</Button></Col>
+              <Col>
+                {
+                  this.state.session
+                  &&
+                  <Button color="success" onClick={this.logSession}>Log Session</Button>
+                }
+              </Col>
             </Row>
           </Container>
         </header>
