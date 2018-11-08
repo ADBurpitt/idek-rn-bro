@@ -117,6 +117,14 @@ Resources:
               - Effect: "Allow"
                 Action: "codebuild:*"
                 Resource: "*"
+              
+              - Effect: "Allow"
+                Action: "cognito-identity:*"
+                Resource: "*"
+
+              - Effect: "Allow"
+                Action: "cognito-idp:*"
+                Resource: "*"
 
   Pipeline:
     Type: "AWS::CodePipeline::Pipeline"

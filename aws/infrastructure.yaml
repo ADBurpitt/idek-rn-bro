@@ -28,7 +28,7 @@ Resources:
     Properties:
       TemplateURL: API.json
       Parameters:
-        PoolArn: !GetAtt Cognito.Outputs.UserPoolArn
+        UserPoolArn: !GetAtt Cognito.Outputs.UserPoolArn
   
   ApiDNS:
     Type: "AWS::CloudFormation::Stack"
