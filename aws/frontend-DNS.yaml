@@ -27,7 +27,7 @@ Resources:
           - !If
             - isProd
             - !Sub app.${DomainName}
-            - !Sub ${Environment}.app.${DomainName}
+            - !Sub app.${Environment}.${DomainName}
         Comment: !If
           - isProd
           - !Sub ${AWS::StackName}-Distribution
@@ -58,7 +58,7 @@ Resources:
       Name: !If
         - isProd
         - !Sub app.${DomainName}
-        - !Sub ${Environment}.app.${DomainName}
+        - !Sub app.${Environment}.${DomainName}
       Type: A
       AliasTarget:
         DNSName: !GetAtt Distribution.DomainName

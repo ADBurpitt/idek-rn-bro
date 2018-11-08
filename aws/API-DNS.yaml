@@ -23,7 +23,7 @@ Resources:
       DomainName: !If
         - isProd
         - !Sub api.${DomainName}
-        - !Sub ${Environment}.api.${DomainName}
+        - !Sub api.${Environment}.${DomainName}
       CertificateArn: !Ref CertificateArn
 
   ApiMapping:
@@ -33,7 +33,7 @@ Resources:
       DomainName: !If
         - isProd
         - !Sub api.${DomainName}
-        - !Sub ${Environment}.api.${DomainName}
+        - !Sub api.${Environment}.${DomainName}
       RestApiId: !Ref RestApiId
       Stage: api
 
@@ -45,7 +45,7 @@ Resources:
       Name: !If
         - isProd
         - !Sub api.${DomainName}
-        - !Sub ${Environment}.api.${DomainName}
+        - !Sub api.${Environment}.${DomainName}
       Type: A
       AliasTarget:
         DNSName: !GetAtt ApiDomainName.DistributionDomainName

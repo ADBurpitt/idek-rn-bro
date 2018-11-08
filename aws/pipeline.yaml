@@ -151,7 +151,7 @@ Resources:
                 Branch: !If
                   - isProd
                   - master
-                  - !Ref Environment
+                  - develop
                 OAuthToken: !Ref GithubOAuthToken
               RunOrder: 1
         
