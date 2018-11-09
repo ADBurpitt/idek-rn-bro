@@ -27,12 +27,11 @@ Resources:
       MfaConfiguration: "OFF"
       AliasAttributes:
         - email
-        - preferred_username
       Schema:
         - Name: name
           AttributeDataType: String
           Mutable: true
-          Required: true
+          # Required: true
         - Name: email
           AttributeDataType: String
           Mutable: false
