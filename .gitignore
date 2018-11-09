@@ -3,3 +3,5 @@ hohoho
 aws/API.json
 
 main
+
+.env.development.local

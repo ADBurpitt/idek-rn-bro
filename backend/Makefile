@@ -12,5 +12,7 @@ build:
 watch:
 	while true; do \
 		make build; \
+		cd src; \
 		inotifywait -qr .; \
+		cd ..; \
 	done

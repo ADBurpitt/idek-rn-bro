@@ -5,10 +5,11 @@
   "author": "ADBurpitt <aaronburpitt@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "front": "cd frontend && yarn start",
-    "back": "cd backend && concurrently 'sam local start-api -p 3001' 'make watch'",
+    "frontend": "cd frontend && yarn start",
+    "frontend-local": "cd frontend && yarn start-local",
+    "backend": "cd backend && concurrently 'sam local start-api -p 3001' 'make watch'",
     "package-api": "aws cloudformation package --template backend/template.yaml --s3-bucket numba2 --output-template api-package.yaml && python backend/sam-translate.py --input-file=\"api-package.yaml\" --output-file=\"aws/API.json\" && rm api-package.yaml",
-    "package": "package-api && aws cloudformation package --template master.yaml --s3-bucket numba2 --output-template packaged.yaml && rm aws/API.json",
-    "update-stack": "package && aws cloudformation update-stack --region eu-west-1 --stack-name Slippy --template-body file:///c/Code/nutless/goodshit/packaged.yaml && rm packaged.yaml"
+    "package": "yarn package-api && aws cloudformation package --template master.yaml --s3-bucket numba2 --output-template packaged.yaml && rm aws/API.json",
+    "update-stack": "yarn package && aws cloudformation update-stack --region eu-west-1 --stack-name Slippy --template-body file:///c/Code/nutless/goodshit/packaged.yaml && rm packaged.yaml"
   }
 }
