@@ -19,14 +19,6 @@ Resources:
     #     - !Sub ${ProjectNameLowercase}-stack-bucket
     #     - !Sub ${ProjectNameLowercase}-${Environment}-stack-bucket
 
-  APIBucket:
-    Type: AWS::S3::Bucket
-    # Properties:
-    #   BucketName: !If
-    #     - isProd
-    #     - !Sub ${ProjectNameLowercase}-stack-bucket
-    #     - !Sub ${ProjectNameLowercase}-${Environment}-stack-bucket
-
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -40,8 +32,6 @@ Resources:
 Outputs:
   TemplateBucket: 
     Value: !Ref TemplateBucket
-  APIBucket:
-    Value: !Ref APIBucket
   FrontendBucket:
     Value: !Ref FrontendBucket
   FrontendBucketDomainName:
