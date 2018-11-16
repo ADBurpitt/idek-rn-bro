@@ -11,10 +11,11 @@ Globals:
   Function:
     Runtime: go1.x
     Handler: main
-  Cors:
-    AllowMethods: "'*'"
-    AllowHeaders: "'*'"
-    AllowOrigin: "'*'"
+  Api:
+    Cors:
+      AllowMethods: "'*'"
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
 
 Resources:
   RestApi:
