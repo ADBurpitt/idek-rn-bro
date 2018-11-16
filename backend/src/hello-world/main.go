@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -43,7 +44,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
-		Body:       fmt.Sprintf("{\"data\": \"%v\"}", string(ip)),
+		Body:       fmt.Sprintf("{\"data\": \"%v\"}", strings.TrimSuffix(string(ip), "\n")),
 	}, nil
 }
 
