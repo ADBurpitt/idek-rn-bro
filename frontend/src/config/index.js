@@ -6,4 +6,4 @@ export const poolData = {
   identityPoolId: process.env.REACT_APP_IDENTITY_POOL
 }
 
-export const API_URL = process.env.REACT_APP_API_URL
+export const API_URL = `https://${process.env.REACT_APP_API_URL}`

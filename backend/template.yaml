@@ -11,13 +11,16 @@ Globals:
   Function:
     Runtime: go1.x
     Handler: main
+  Cors:
+    AllowMethods: "'*'"
+    AllowHeaders: "'*'"
+    AllowOrigin: "'*'"
 
 Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: api
-      Cors: "'*'"
       Auth:
         DefaultAuthorizer: Cognito
         Authorizers:
