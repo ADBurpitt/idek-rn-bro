@@ -43,7 +43,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers:    map[string]string{"Access-Control-Allow-Origin": "*"},
-		Body:       fmt.Sprintf("Hey, %v", string(ip)),
+		Body:       fmt.Sprintf("{\"data\": \"%v\"}", string(ip)),
 	}, nil
 }
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
+import { Auth } from 'aws-amplify'
 import axios from 'axios'
 
 import { API_URL } from 'config'
@@ -7,13 +8,19 @@ import { API_URL } from 'config'
 import { Container, Row, Col, Jumbotron, Button } from 'reactstrap'
 
 class TestApi extends Component {
-  state = { 
+  state = {
+    token: null,
     helloWorld: { data: '', status: 'primary' }
   }
   
+  componentDidMount = () =>
+    Auth.currentSession()
+      .then(data => this.setState({ token: data.idToken.jwtToken }))
+      .catch(err => console.log(err))
+
   helloWorld = async () => {
     try {
-      const data = await axios.post(`${API_URL}/hello`, { Authorization: 'idk' })
+      const data = await axios.post(`${API_URL}/hello`, { Authorization: this.state.token })
       this.setState({ helloWorld: { data, status: 'success' } })
     } catch (error) {
       this.setState({ helloWorld: { error, status: 'danger' } })
@@ -26,7 +33,7 @@ class TestApi extends Component {
       <Container>
         <Jumbotron className="margin-top-100 text-center">
           <h1 className="display-3">Hello, API!</h1>
-          <p className="lead">Click Buttons to test each API</p>
+          <p className="lead">{ this.state.token ? 'Token ready' : 'No token' }</p>
           <hr className="my-2" />
           <Container className="margin-top-25 text-center" >
             <Row>
