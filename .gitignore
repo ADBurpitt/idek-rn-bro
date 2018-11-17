@@ -5,3 +5,5 @@ aws/API.json
 main
 
 .env.development.local
+
+packaged.yaml
