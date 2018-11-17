@@ -120,7 +120,7 @@ Resources:
             Value: !If
               - isProd
               - !Sub api.${DomainName}
-              - !Sub ${Environment}.api.${DomainName}
+              - !Sub api.${Environment}.${DomainName}
           - Name: REGION
             Value: !Ref AWS::Region
           - Name: IDENTITY_POOL
