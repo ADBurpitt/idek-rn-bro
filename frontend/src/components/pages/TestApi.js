@@ -23,7 +23,8 @@ class TestApi extends Component {
       const { data } = await axios.get(`${API_URL}/hello`, { headers: { 'Authorization': this.state.token } })
       this.setState({ helloWorld: { data: data.message, status: 'success' } })
     } catch (err) {
-      this.setState({ helloWorld: { error: err.response.data.message, status: 'danger' } })
+      console.log(err)
+      // this.setState({ helloWorld: { error: err.response.data.message, status: 'danger' } })
     }
   }
 
@@ -33,7 +34,7 @@ class TestApi extends Component {
       <Container>
         <Jumbotron className="margin-top-100 text-center">
           <h1 className="display-3">Hello, API!</h1>
-          <p className="lead">{ this.state.token ? this.state.token : 'No token' }</p>
+          <p className="lead">{ this.state.token ? 'Token ready' : 'No token' }</p>
           <hr className="my-2" />
           <Container className="margin-top-25 text-center">
             <Row>
@@ -42,7 +43,7 @@ class TestApi extends Component {
                 <Button color={helloWorld.status} onClick={this.helloWorld} >Get IP</Button>
               </Col>
               <Col className="my-auto" sm={1}><h5>IP:</h5></Col>
-              <Col><p>{ helloWorld.data }</p></Col>
+              <Col className="my-auto"><h3>{ helloWorld.data }</h3></Col>
             </Row>
           </Container>
         </Jumbotron>
