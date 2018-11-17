@@ -41,6 +41,11 @@ Resources:
           AcmCertificateArn: !Ref CertificateArn
           SslSupportMethod: sni-only
         DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCachingMinTTL: 0
+            ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
         Enabled: true
         DefaultCacheBehavior: 
           MinTTL: 86400

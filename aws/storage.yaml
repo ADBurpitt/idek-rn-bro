@@ -28,6 +28,7 @@ Resources:
       #   - !Sub ${ProjectNameLowercase}-${Environment}-frontend-bucket
       WebsiteConfiguration:
         IndexDocument: index.html
+        ErrorDocument: index.html
 
 Outputs:
   TemplateBucket: 
